@@ -1,3 +1,352 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Agregando estilos para tema oscuro */
+:root {
+    --bg-dark-theme: #1A202C;
+    --bg-card-theme: #ffffff;
+    --text-primary: #333333;
+    --text-secondary: #6c757d;
+    --border-color: #e5e7eb;
+}
+
+.bg-dark-theme {
+    background-color: var(--bg-dark-theme) !important;
+}
+
+.bg-theme-header {
+    background-color: var(--bg-dark-theme) !important;
+    color: white !important;
+}
+
+.bg-theme-header h2 {
+    color: white !important;
+}
+
+/* Estilos adicionales para elementos específicos en tema oscuro */
+input, textarea, select {
+    background-color: #1f2937 !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+input:focus, textarea:focus, select:focus {
+    background-color: #2d3748 !important;
+    border-color: #3b82f6 !important;
+    outline: none !important;
+}
+
+button.btn-dark {
+    background-color: #2d3748 !important;
+    border-color: #4a5568 !important;
+}
+
+button.btn-dark:hover {
+    background-color: #374151 !important;
+}
+
+/* Estilos específicos para el dashboard */
+.card {
+    border-radius: 0.5rem !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08) !important;
+    margin-bottom: 1.5rem;
+    padding: 0.25rem;
+}
+
+.card-header {
+    background-color: var(--bg-card-theme) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    padding: 1.25rem 1.5rem !important;
+}
+
+/* Ajustar estilos para formularios dentro de tarjetas blancas */
+.card input, .card textarea, .card select {
+    background-color: #ffffff !important;
+    color: var(--text-primary) !important;
+    border-color: #d1d5db !important;
+}
+
+.card input:focus, .card textarea:focus, .card select:focus {
+    background-color: #ffffff !important;
+    border-color: #3b82f6 !important;
+    outline: none !important;
+}
+
+/* Estilos para las tablas con fondo blanco */
+.table th {
+    border-bottom: 1px solid #e5e7eb !important;
+    color: #4b5563 !important;
+}
+
+.table td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    color: #333333 !important;
+}
+
+/* Mantener el contraste en los componentes de navegación */
+.nav-link, .dropdown-link {
+    color: #f7fafc !important;
+}
+
+/* Quitar subrayado de todos los enlaces de menú */
+.nav-link, 
+.dropdown-link, 
+.responsive-nav-link,
+.inline-flex,
+nav a,
+nav button,
+.dropdown-content a {
+    text-decoration: none !important;
+}
+
+/* Asegurar que los enlaces no se subrayen al pasar el cursor */
+.nav-link:hover, 
+.dropdown-link:hover, 
+.responsive-nav-link:hover {
+    text-decoration: none !important;
+}
+
+/* Estilos para badges dentro del dashboard */
+.badge {
+    font-weight: 500 !important;
+}
+
+/* Ajuste para elementos de progreso */
+.progress {
+    background-color: #e5e7eb !important;
+}
+
+/* Este estilo es necesario para sobreescribir el gris claro */
+.bg-gray-100 {
+    background-color: var(--bg-dark-theme) !important;
+}
+
+/* Ajustes para el centro del dropdown y fondo blanco */
+.dropdown-menu-centered {
+    transform: translateX(-50%) !important;
+    left: 50% !important;
+    right: auto !important;
+}
+
+/* Redefinir estilos de dropdown para fondo blanco */
+.dropdown-content {
+    background-color: white !important;
+    border: 1px solid #e5e7eb !important;
+    color: #333333 !important;
+}
+
+.dropdown-link, .dropdown-link * {
+    color: #333333 !important;
+}
+
+.dropdown-link:hover {
+    background-color: #f3f4f6 !important;
+    color: #111827 !important;
+}
+
+/* Para asegurar que los iconos tengan el color correcto */
+.dropdown-link i {
+    color: #4b5563 !important;
+}
+
+/* Arreglos para dropdown de perfil en navbar */
+.dropdown-content {
+    background-color: var(--bg-dark-theme) !important;
+    border-color: #4a5568 !important;
+}
+
+.dropdown-link, .dropdown-link * {
+    color: white !important;
+}
+
+.dropdown-link:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Corregir la visibilidad del texto en los dropdowns */
+.dropdown-content {
+    background-color: #1A202C !important;
+    border-color: #4a5568 !important;
+}
+
+.dropdown-link, .dropdown-link * {
+    color: white !important;
+}
+
+.dropdown-link:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Corregir la posición de los dropdowns */
+.dropdown-container {
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
+}
+
+/* Para asegurar que los iconos tengan el color correcto */
+.dropdown-link i {
+    color: white !important;
+}
+
+/* Corregir visibilidad de texto en navegación */
+.bg-navigation button,
+.bg-navigation button div,
+.bg-navigation .inline-flex,
+.bg-navigation .inline-flex div,
+.bg-navigation svg {
+    color: white !important;
+    fill: white !important;
+}
+
+/* Asegurar contraste para el texto del usuario */
+.inline-flex div {
+    color: white !important;
+}
+
+/* Estilos específicos para el texto del usuario en la barra superior */
+nav button.inline-flex,
+nav button.inline-flex div {
+    color: white !important;
+}
+
+/* Mejorar el espaciado general del dashboard */
+.container {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+    max-width: 1400px !important;
+}
+
+/* Mayor espaciado en el contenido de las tarjetas */
+.card-body {
+    padding: 1.5rem !important;
+}
+
+/* Mejorar el espaciado entre filas */
+.row {
+    margin-bottom: 1.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+
+.mb-5 {
+    margin-bottom: 2rem !important;
+}
+
+/* Mejorar espaciado vertical general */
+.py-12 {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+}
+
+/* Fuente Montserrat para todo el sitio */
+body, 
+h1, h2, h3, h4, h5, h6,
+p, span, div, a, button,
+input, textarea, select,
+table, th, td, label, li {
+    font-family: 'Montserrat', sans-serif !important;
+}
+
+/* Ajustar pesos de fuente */
+h1, h2, h3, .card-title {
+    font-weight: 600 !important;
+}
+
+h4, h5, h6, .badge {
+    font-weight: 500 !important;
+}
+
+/* Texto normal */
+p, div, td, th {
+    font-weight: 400 !important;
+}
+
+/* Texto fino */
+.text-muted, small {
+    font-weight: 300 !important;
+}
+
+/* Ajustar tamaños de fuente */
+h1 {
+    font-size: 2rem !important;
+}
+
+h2 {
+    font-size: 1.75rem !important;
+}
+
+h3 {
+    font-size: 1.5rem !important;
+}
+
+h4 {
+    font-size: 1.25rem !important;
+}
+
+h5 {
+    font-size: 1.1rem !important;
+}
+
+h6 {
+    font-size: 1rem !important;
+}
+
+.card-title {
+    font-size: 1.1rem !important;
+}
+
+/* Mejorar la legibilidad del texto */
+p, div, td, th {
+    letter-spacing: 0.01em !important;
+}
+
+/* Estilos para el logo con icono de camión */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon i {
+    color: #4299e1;
+    transition: transform 0.3s ease;
+}
+
+.logo-container:hover .logo-icon i {
+    transform: translateX(5px);
+}
+
+.logo-text {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+}
+
+.logo-text span {
+    color: #4299e1;
+}
+
+/* Estilos para el logo en las páginas de autenticación */
+.auth-logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.auth-logo-container i {
+    margin-bottom: 0.5rem;
+}
+
+.auth-logo-container h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-top: 0.5rem;
+    color: #333333;
+}
+
+/* Agregar estas clases al final para asegurar que sobreescriban otros estilos */

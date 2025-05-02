@@ -2,16 +2,16 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
+    <!-- Logo del login -->
+    <div class="auth-logo-container mb-4 text-center">
+        <img src="{{ asset('images/pickntruck.png') }}" alt="Pickntruck Logo" class="logo-image" style="height: 48px; margin: 0 auto;" />
+    </div>
+
     <div class="card border-0 shadow-sm login-card">
         <div class="card-body py-5">
             <div class="text-center mb-4">
                 <h1 class="h4 text-gray-900 mb-3">{{ __('Iniciar Sesión') }}</h1>
-                <div class="mb-4 d-flex justify-content-center">
-                    <div class="auth-logo-container">
-                        <i class="fas fa-truck fa-3x text-primary truck-animation"></i>
-                        <h2 class="mt-2 font-weight-bold logo-text-animation">Pick<span class="text-primary">n</span>truck</h2>
-                    </div>
-                </div>
+                <!-- Eliminado el logo duplicado con el camión -->
             </div>
 
             <form method="POST" action="{{ route('login') }}">
@@ -19,7 +19,7 @@
 
                 <!-- Email Address -->
                 <div class="form-group mb-4">
-                    <x-input-label for="email" :value="__('Email')" />
+                    <x-input-label for="email" :value="__('Correo electrónico')" />
                     <x-text-input id="email" class="form-control" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>

@@ -349,4 +349,89 @@ p, div, td, th {
     color: #333333;
 }
 
+/* Estilos para el logo con imagen PNG */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.logo-container:hover {
+    transform: translateY(-2px);
+}
+
+.logo-container .logo-image {
+    height: 32px; /* Reducido de 40px (un 20% menos) */
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+/* Estilos para el logo en las páginas de autenticación */
+.auth-logo-container .logo-image {
+    height: 48px; /* Reducido de 60px (un 20% menos) */
+    width: auto;
+    margin-bottom: 0.5rem;
+}
+
+/* Ajuste específico para el logo en la navegación */
+.shrink-0.flex.items-center .logo-container .logo-image {
+    height: 32px;
+    width: auto;
+    display: block;
+}
+
+/* Estilos para el logo con imagen PNG - Corrección para asegurar visibilidad */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+/* Asegurar que la imagen tenga las dimensiones correctas */
+.logo-image {
+    height: 32px; /* Reducido de 40px (un 20% menos) */
+    width: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+/* Estilos específicos para el logo en páginas de autenticación */
+.auth-logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.auth-logo-container .logo-image {
+    height: 48px;
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.auth-logo-container .logo-image:hover {
+    transform: translateY(-2px);
+}
+
+/* Animación para el logo en páginas de autenticación */
+@keyframes floatAnimation {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.auth-logo-container .logo-image {
+    animation: floatAnimation 3s ease-in-out infinite;
+}
+
 /* Agregar estas clases al final para asegurar que sobreescriban otros estilos */

@@ -9,11 +9,7 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Favicon -->
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon/favicon-32x32.png') }}">
-        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon/favicon-16x16.png') }}">
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('favicon/apple-touch-icon.png') }}">
-        <link rel="manifest" href="{{ asset('favicon/site.webmanifest') }}">
-        <meta name="theme-color" content="#1A202C">
+        <x-favicon-meta />
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -24,7 +20,7 @@
         
         <!-- Font Awesome para iconos -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+        
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         
@@ -33,7 +29,7 @@
         
         <!-- CSS para corrección de modales -->
         <link rel="stylesheet" href="{{ asset('css/modal-fix.css') }}">
-
+        
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         
@@ -58,7 +54,6 @@
             .min-h-screen {
                 background-color: #1A202C !important;
             }
-            /* Cambiamos el fondo de tarjetas y elementos a blanco */
             .bg-white {
                 --tw-bg-opacity: 1;
                 background-color: #ffffff !important;
@@ -103,44 +98,30 @@
                 --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color) !important;
                 box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important;
             }
-            /* Ajustar el estilo de las tablas para fondo blanco */
             .table {
                 color: #333333 !important;
             }
             .table-hover tbody tr:hover {
-                color: #111827 !important;
                 background-color: rgba(0, 0, 0, 0.04) !important;
             }
-            /* Ajustamos la opacidad de los badges */
             .bg-success, .bg-danger, .bg-warning, .bg-info, .bg-primary {
                 opacity: 1 !important;
             }
-            /* Estilo para el texto en el header (mientras mantenemos el fondo oscuro del navbar) */
             .bg-theme-header {
                 background-color: #1A202C !important;
             }
-            /* Aseguramos texto legible en elementos específicos */
             .bg-opacity-10 {
                 background-opacity: 0.1 !important;
             }
-            /* Los íconos de estadísticas mantienen colores originales */
             .icon-box.bg-success, .icon-box.bg-warning, .icon-box.bg-info, .icon-box.bg-primary, .icon-box.bg-dark {
                 opacity: 1 !important;
             }
-            /* Texto oscuro para elementos dentro de tarjetas */
             .card h1, .card h2, .card h3, .card h4, .card h5, .card h6, 
             .card .card-title, .card .text-muted, .list-group-item {
                 color: #333333 !important;
             }
             .text-muted {
                 color: #6c757d !important;
-            }
-            /* Ajuste para el header */
-            .bg-theme-header {
-                background-color: #1A202C !important;
-            }
-            header h2, header .badge {
-                color: white !important;
             }
             header .btn-outline-primary {
                 color: #f7fafc !important;
@@ -154,39 +135,28 @@
                 background-color: #4299e1 !important;
                 border-color: #4299e1 !important;
             }
-            
-            /* Estilos para dropdown en navbar con fondo blanco */
             .dropdown-content {
                 background-color: white !important;
                 border: 1px solid #e5e7eb !important;
                 color: #333333 !important;
             }
-            
-            /* Asegurar que los links en dropdown sean oscuros */
             .dropdown-link {
                 color: #374151 !important;
             }
-            
             .dropdown-link:hover {
                 background-color: #f3f4f6 !important;
                 color: #111827 !important;
             }
-            
-            /* Estilo para contenido del dropdown */
             .dropdown-content div a, 
             .dropdown-content div button,
             .dropdown-content div form button {
                 color: #374151 !important;
             }
-            
-            /* Corregir posición del dropdown para centrarlo */
             .dropdown-menu-centered {
                 transform: translateX(-50%) !important;
                 left: 50% !important;
                 right: auto !important;
             }
-            
-            /* Ajustes adicionales para el texto en la navbar */
             .text-white-nav,
             [class*="text-white"],
             nav button,
@@ -194,154 +164,108 @@
             .inline-flex div {
                 color: white !important;
             }
-            
-            /* Asegurar que el botón de perfil sea visible */
             nav .inline-flex {
                 color: white !important;
             }
-            
-            /* Asegurar contraste en el menú hamburguesa */
             button[aria-controls="mobile-menu"] {
                 color: white !important;
             }
-            
-            /* Forzar color blanco para todos los textos en la navegación */
             nav .text-sm, 
             nav .font-medium, 
             nav .leading-4, 
             nav button div {
                 color: white !important;
             }
-            
-            /* Estilos para dropdown con fondo oscuro y texto blanco */
             .dropdown-content {
                 background-color: #1A202C !important;
                 border: 1px solid #4a5568 !important;
                 color: white !important;
             }
-            
-            /* Asegurar que los links en dropdown sean blancos */
             .dropdown-link {
                 color: white !important;
             }
-            
             .dropdown-link:hover {
                 background-color: #2d3748 !important;
                 color: white !important;
             }
-            
-            /* Estilo para contenido del dropdown */
             .dropdown-content div a, 
             .dropdown-content div button,
             .dropdown-content div form button {
                 color: white !important;
             }
-            
-            /* Ajustar posición del dropdown para que no se salga */
             .dropdown-container {
                 right: 0 !important;
                 left: auto !important;
                 transform: none !important;
             }
-            
-            /* Estilo especial para el dropdown de perfil */
             #profile-dropdown .dropdown-container {
                 right: 0 !important;
                 left: auto !important;
             }
-            
-            /* Mejoras de espaciado para contenedores */
             .container {
                 padding-left: 1.5rem !important;
                 padding-right: 1.5rem !important;
                 max-width: 1400px !important;
             }
-            
             main {
                 padding: 0.5rem;
             }
-            
-            /* Espaciado mejorado para las tarjetas */
             .card {
                 margin-bottom: 1.5rem;
             }
-            
             .card-body {
                 padding: 1.5rem !important;
             }
-            
             .card-header {
                 padding: 1.25rem 1.5rem !important;
             }
-            
-            /* Espaciado entre filas */
             .row {
                 margin-bottom: 1rem;
             }
-            
             .mb-4 {
                 margin-bottom: 1.5rem !important;
             }
-            
             .mb-5 {
                 margin-bottom: 2rem !important;
             }
-            
-            /* Mejoras para espaciado en pantallas móviles */
             @media (max-width: 768px) {
                 .container {
                     padding-left: 1rem !important;
                     padding-right: 1rem !important;
                 }
-                
                 .card-body {
                     padding: 1.25rem !important;
                 }
             }
-            
-            /* Aplicar Montserrat a todos los elementos de texto */
             h1, h2, h3, h4, h5, h6,
             p, span, div, a, button,
             input, textarea, select,
             table, th, td, label, li {
                 font-family: 'Montserrat', sans-serif !important;
             }
-            
-            /* Ajustar pesos de fuente */
             h1, h2, h3, .card-title {
                 font-weight: 600 !important;
             }
-            
             h4, h5, h6 {
                 font-weight: 500 !important;
             }
-            
-            /* Texto normal */
             p, div, td {
                 font-weight: 400 !important;
             }
-            
-            /* Texto fino */
             .text-muted, small {
                 font-weight: 300 !important;
             }
-            
-            /* Quitar subrayado de enlaces */
             a, button, .nav-link, .dropdown-link {
                 text-decoration: none !important;
             }
-            
             a:hover, button:hover, .nav-link:hover, .dropdown-link:hover {
                 text-decoration: none !important;
             }
-            
-            /* Estilos para el logo */
             .logo-container {
                 display: flex;
                 align-items: center;
                 gap: 10px;
             }
-            
             .logo-icon {
                 display: flex;
                 align-items: center;
@@ -349,12 +273,10 @@
                 height: 40px;
                 width: 40px;
             }
-            
             .logo-text {
                 display: flex;
                 align-items: center;
             }
-            
             @media (max-width: 640px) {
                 .logo-text {
                     display: none;
@@ -362,13 +284,12 @@
             }
         </style>
         
-        <!-- Scripts personalizados -->
         @stack('styles')
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-dark-theme">
             @include('layouts.navigation')
-
+            
             <!-- Page Heading -->
             @isset($header)
                 <header class="bg-theme-header shadow">
@@ -377,13 +298,13 @@
                     </div>
                 </header>
             @endisset
-
+            
             <!-- Page Content -->
             <main>
                 {{ $slot }}
             </main>
         </div>
-
+        
         <!-- Bootstrap Bundle with Popper -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         

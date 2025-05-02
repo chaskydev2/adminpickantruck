@@ -54,6 +54,21 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'asset_url' => env('ASSET_URL'),
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Documents URL
+    |--------------------------------------------------------------------------
+    |
+    | This URL is used to access documents stored in the external application.
+    | This allows the admin panel to correctly link to documents that are
+    | stored in another project's storage.
+    |
+    */
+    
+    'documents_url' => env('DOCUMENTS_URL', 'https://app.pickntruck.com/storage'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

@@ -111,3 +111,41 @@
 .auth-logo-container i {
     font-size: 2.5rem !important;
 }
+
+/* Aplicar animaciones a la imagen del logo */
+.logo-container .logo-image {
+    animation: fadeInText 0.5s ease-in-out 0.3s forwards;
+}
+
+/* Animación al cargar la página */
+.page-loading .logo-image {
+    animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+/* Animación al pasar el cursor */
+.logo-container:hover .logo-image,
+.auth-logo-container:hover .logo-image {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Mantener animaciones existentes para compatibilidad */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}

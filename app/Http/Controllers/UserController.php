@@ -148,13 +148,18 @@ class UserController extends Controller
     public function showDocument($id)
     {
         $userDocument = UserDocument::findOrFail($id);
-        $externalPath = '/Users/marioreque/Documents/04-pickntruck/pincktries/pickn6/storage/app/public/' . $userDocument->file_path;
         
-        if (file_exists($externalPath)) {
-            return response()->file($externalPath);
+        // Verificamos si la ruta comienza con 'http' o 'https'
+        if (filter_var($userDocument->file_path, FILTER_VALIDATE_URL)) {
+            return redirect($userDocument->file_path);
         }
         
-        abort(404);
+        // Construimos la URL pública para el documento
+        $baseUrl = config('app.documents_url', 'https://app.pickntruck.com/storage');
+        $documentUrl = $baseUrl . '/' . $userDocument->file_path;
+        
+        // Redirigimos al usuario a la URL del documento
+        return redirect($documentUrl);
     }
 
     public function updateDocumentStatus(Request $request, $documentId)

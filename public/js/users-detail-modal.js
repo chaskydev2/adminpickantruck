@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <p class="text-muted mb-0 small">${doc.document_type || 'Documento'}</p>
                     <div class="mt-2">
-                        <a href="/document/${doc.id}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <a href="/document/${doc.id}" target="_blank" class="btn btn-sm btn-outline-primary" data-document-id="${doc.id}">
                             <i class="fas fa-eye me-1"></i> Ver
                         </a>
                         <button class="btn btn-sm btn-outline-success ms-1 btn-approve-doc" data-document-id="${doc.id}" ${doc.status === 'aprobado' ? 'disabled' : ''}>

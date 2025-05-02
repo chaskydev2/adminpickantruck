@@ -1,67 +1,62 @@
 <x-guest-layout>
-    <div class="card border-0 shadow-sm register-card">
-        <div class="card-body py-5">
-            <div class="text-center mb-4">
-                <h1 class="h4 text-gray-900 mb-3">{{ __('Registro de Usuario') }}</h1>
-                <div class="mb-4 d-flex justify-content-center">
-                    <div class="auth-logo-container">
-                        <i class="fas fa-truck fa-3x text-primary truck-animation"></i>
-                        <h2 class="mt-2 font-weight-bold logo-text-animation">Pick<span class="text-primary">n</span>truck</h2>
-                    </div>
-                </div>
+    <!-- Logo del registro -->
+    <div class="auth-logo-container mb-4 text-center">
+        <img src="{{ asset('images/pickntruck.png') }}" alt="Pickntruck Logo" class="logo-image" style="height: 48px; margin: 0 auto;" />
+    </div>
+
+    <div class="auth-card p-4 bg-white shadow-md rounded-lg">
+        <h1 class="text-center text-xl font-bold mb-4">{{ __('Registro') }}</h1>
+
+        <form method="POST" action="{{ route('register') }}">
+            @csrf
+
+            <!-- Name -->
+            <div>
+                <x-input-label for="name" :value="__('Nombre')" />
+                <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+                <x-input-error :messages="$errors->get('name')" class="mt-2" />
             </div>
 
-            <form method="POST" action="{{ route('register') }}">
-                @csrf
+            <!-- Email Address -->
+            <div class="form-group mb-3">
+                <x-input-label for="email" :value="__('Email')" />
+                <x-text-input id="email" class="form-control" type="email" name="email" :value="old('email')" required autocomplete="username" />
+                <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            </div>
 
-                <!-- Name -->
-                <div class="form-group mb-3">
-                    <x-input-label for="name" :value="__('Nombre')" />
-                    <x-text-input id="name" class="form-control" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
-                </div>
+            <!-- Password -->
+            <div class="form-group mb-3">
+                <x-input-label for="password" :value="__('Contraseña')" />
 
-                <!-- Email Address -->
-                <div class="form-group mb-3">
-                    <x-input-label for="email" :value="__('Email')" />
-                    <x-text-input id="email" class="form-control" type="email" name="email" :value="old('email')" required autocomplete="username" />
-                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                </div>
+                <x-text-input id="password" class="form-control"
+                                type="password"
+                                name="password"
+                                required autocomplete="new-password" />
 
-                <!-- Password -->
-                <div class="form-group mb-3">
-                    <x-input-label for="password" :value="__('Contraseña')" />
+                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            </div>
 
-                    <x-text-input id="password" class="form-control"
-                                    type="password"
-                                    name="password"
-                                    required autocomplete="new-password" />
+            <!-- Confirm Password -->
+            <div class="form-group mb-4">
+                <x-input-label for="password_confirmation" :value="__('Confirmar Contraseña')" />
 
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                </div>
+                <x-text-input id="password_confirmation" class="form-control"
+                                type="password"
+                                name="password_confirmation" required autocomplete="new-password" />
 
-                <!-- Confirm Password -->
-                <div class="form-group mb-4">
-                    <x-input-label for="password_confirmation" :value="__('Confirmar Contraseña')" />
+                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+            </div>
 
-                    <x-text-input id="password_confirmation" class="form-control"
-                                    type="password"
-                                    name="password_confirmation" required autocomplete="new-password" />
+            <div class="d-flex align-items-center justify-content-between mt-4">
+                <a href="{{ route('login') }}" class="text-sm text-gray-700 underline">
+                    {{ __('¿Ya tienes cuenta? Inicia Sesión') }}
+                </a>
 
-                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-                </div>
-
-                <div class="d-flex align-items-center justify-content-between mt-4">
-                    <a href="{{ route('login') }}" class="text-sm text-gray-700 underline">
-                        {{ __('¿Ya tienes cuenta? Inicia Sesión') }}
-                    </a>
-
-                    <x-primary-button class="btn btn-primary btn-block">
-                        {{ __('Registrarse') }}
-                    </x-primary-button>
-                </div>
-            </form>
-        </div>
+                <x-primary-button class="btn btn-primary btn-block">
+                    {{ __('Registrarse') }}
+                </x-primary-button>
+            </div>
+        </form>
     </div>
 
     @push('styles')

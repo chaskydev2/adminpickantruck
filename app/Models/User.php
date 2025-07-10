@@ -6,26 +6,65 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\OfertaRuta;
 
 class User extends Authenticatable
 {
+    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * Get the ofertas de carga for the user.
+     */
+    /**
+     * Obtiene los detalles adicionales del usuario.
+     */
+    public function detail(): HasOne
+    {
+        return $this->hasOne(UserDetail::class);
+    }
+
+    /**
+     * Obtiene las ofertas de carga del usuario.
+     */
+    public function ofertasCarga()
+    {
+        return $this->hasMany(OfertaCarga::class);
+    }
+
+        /**
+     * Obtiene las ofertas de ruta del usuario.
+     */
+    public function ofertasRuta()
+    {
+        return $this->hasMany(OfertaRuta::class, 'user_id');
+    }
+    
+    /**
+     * Obtiene los documentos subidos por el usuario.
+     */
+    public function documents()
+    {
+        return $this->hasMany(UserDocument::class, 'user_id');
+    }
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'verified',
     ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -33,30 +72,15 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
-    
-    /**
-     * Verifica si el usuario es administrador
-     */
-    public function isAdmin()
+    protected function casts(): array
     {
-        // Puedes implementar la lógica según tu aplicación
-        // Por ejemplo, si tienes un campo role
-        return $this->role === 'admin';
-    }
-
-    /**
-     * Relación con documentos de usuario
-     */
-    public function documents()
-    {
-        return $this->hasMany(UserDocument::class);
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 }

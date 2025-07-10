@@ -1,80 +1,119 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\AdministratorController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\RequiredDocumentController;
-use App\Http\Controllers\OfertaController;
-use App\Http\Controllers\TypeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CargaController;
+use App\Http\Controllers\RutaController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\UserDocumentController;
+use App\Http\Controllers\BidController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\ProfileController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
+// Ruta de inicio redirige al login
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
-    // Rutas para administradores
-    Route::resource('administrators', AdministratorController::class);
-    
-    // Rutas para usuarios
-    Route::resource('users', UserController::class);
-    Route::post('/users/{user}/verify', [UserController::class, 'verify'])->name('users.verify');
-    Route::post('/users/{user}/unverify', [UserController::class, 'unverify'])->name('users.unverify');
-    
-    // Añadir esta ruta para verificar documentos
-    Route::get('/users/{user}/check-documents', [UserController::class, 'checkPendingDocuments'])
-        ->name('users.check-documents');
-        
-    // Añadir esta ruta para obtener detalles del usuario
-    Route::get('/users/{user}/details', [UserController::class, 'details'])
-        ->name('users.details');
-    
-    // Rutas para ver y administrar documentos de usuarios
-    Route::get('/document/{id}', [UserController::class, 'showDocument'])->name('document.show');
-    Route::post('/document/{id}/update-status', [UserController::class, 'updateDocumentStatus'])->name('document.update-status');
-    
-    // Rutas para documentos requeridos - Corregido de DocumentController a RequiredDocumentController
-    Route::resource('documents', RequiredDocumentController::class);
-    
-    // Rutas para ofertas
-    Route::get('/ofertas/cargas', [OfertaController::class, 'cargas'])->name('ofertas.cargas');
-    Route::get('/ofertas/rutas', [OfertaController::class, 'rutas'])->name('ofertas.rutas');
-    Route::get('/ofertas/pujas', [OfertaController::class, 'pujas'])->name('ofertas.pujas');
+// Rutas de autenticación
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Rutas para tipos de camiones y cargas
-    Route::get('/types', [TypeController::class, 'index'])->name('types.index');
-    Route::post('/types', [TypeController::class, 'store'])->name('types.store');
-    Route::put('/types/{id}', [TypeController::class, 'update'])->name('types.update');
-    Route::delete('/types/{id}', [TypeController::class, 'destroy'])->name('types.destroy');
+// Rutas protegidas
+Route::middleware(['auth'])->group(function () {
+    // Perfil de administrador
+    Route::prefix('perfil')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'show'])->name('show');
+        Route::get('/editar', [ProfileController::class, 'edit'])->name('edit');
+        Route::put('/', [ProfileController::class, 'update'])->name('update');
+        Route::get('/cambiar-contrasena', [ProfileController::class, 'showChangePassword'])->name('change-password');
+        Route::put('/cambiar-contrasena', [ProfileController::class, 'updatePassword'])->name('update-password');
+    });
+    // Dashboard
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+
+    // Buscador
+    Route::match(['get', 'options'], '/search/users', [SearchController::class, 'searchUsers'])->name('search.users');
+    Route::match(['get', 'options'], '/search/cargas', [SearchController::class, 'searchCargas'])->name('search.cargas');
+    Route::match(['get', 'options'], '/search/rutas', [SearchController::class, 'searchRutas'])->name('search.rutas');
+    Route::match(['get', 'options'], '/search/documents', [SearchController::class, 'searchDocuments'])->name('search.documents');
+    Route::match(['get', 'options'], '/search/bids', [SearchController::class, 'searchBids'])->name('search.bids');
+    Route::match(['get', 'options'], '/search/global', [SearchController::class, 'searchGlobal'])->name('search.global');
+    Route::options('/search/users', [SearchController::class, 'options']);
+    Route::options('/search/cargas', [SearchController::class, 'options']);
+    Route::options('/search/rutas', [SearchController::class, 'options']);
+    Route::options('/search/documents', [SearchController::class, 'options']);
+    Route::options('/search/bids', [SearchController::class, 'options']);
+    Route::options('/search/global', [SearchController::class, 'options']);
+
+    // Usuarios
+    Route::prefix('usuarios')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('users.index');
+        Route::get('/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::post('/{user}/toggle-verification', [UserController::class, 'toggleVerification'])->name('users.toggle-verification');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    });
+
+    // Cargas
+    Route::prefix('cargas')->group(function () {
+        Route::get('/', [CargaController::class, 'index'])->name('cargas.index');
+        Route::get('/crear', [CargaController::class, 'create'])->name('cargas.create');
+        Route::post('/', [CargaController::class, 'store'])->name('cargas.store');
+        Route::get('/{carga}', [CargaController::class, 'show'])->name('cargas.show');
+        Route::get('/{carga}/editar', [CargaController::class, 'edit'])->name('cargas.edit');
+        Route::put('/{carga}', [CargaController::class, 'update'])->name('cargas.update');
+        Route::delete('/{carga}', [CargaController::class, 'destroy'])->name('cargas.destroy');
+        Route::get('/usuario/{userId}', [CargaController::class, 'porUsuario'])->name('cargas.por-usuario');
+    });
+
+    // Rutas de Pujas
+    Route::prefix('pujas')->group(function () {
+        Route::get('/', [BidController::class, 'index'])->name('bids.index');
+        Route::get('/{bid}', [BidController::class, 'show'])->name('bids.show');
+        Route::patch('/{bid}/status', [BidController::class, 'updateStatus'])->name('bids.update-status');
+        Route::post('/{bid}/confirm/{tipoUsuario}', [BidController::class, 'confirmarAceptacion'])->name('bids.confirm');
+    });
+
+    // Rutas de Chat
+    Route::prefix('chats')->group(function () {
+        Route::get('/', [ChatController::class, 'index'])->name('chats.index');
+        Route::get('/{chat}', [ChatController::class, 'show'])->name('chats.show');
+        Route::post('/{chat}/message', [ChatController::class, 'sendMessage'])->name('chats.message.send');
+        Route::get('/{chat}/messages', [ChatController::class, 'getMessages'])->name('chats.messages');
+        Route::post('/{chat}/read', [ChatController::class, 'markAsRead'])->name('chats.markAsRead');
+    });
+
+    // Rutas de Ofertas de Ruta
+    Route::prefix('rutas')->group(function () {
+        Route::get('/', [RutaController::class, 'index'])->name('rutas.index');
+        Route::get('/crear', [RutaController::class, 'create'])->name('rutas.create');
+        Route::post('/', [RutaController::class, 'store'])->name('rutas.store');
+        Route::get('/{ruta}', [RutaController::class, 'show'])->name('rutas.show');
+        Route::get('/{ruta}/editar', [RutaController::class, 'edit'])->name('rutas.edit');
+        Route::put('/{ruta}', [RutaController::class, 'update'])->name('rutas.update');
+        Route::delete('/{ruta}', [RutaController::class, 'destroy'])->name('rutas.destroy');
+        Route::get('/usuario/{userId}', [RutaController::class, 'porUsuario'])->name('rutas.por-usuario');
+    });
+
+    // Rutas para documentos requeridos
+    Route::prefix('documentos')->group(function () {
+        Route::get('/', [DocumentController::class, 'index'])->name('documents.index');
+        Route::get('/crear', [DocumentController::class, 'create'])->name('documents.create');
+        Route::post('/', [DocumentController::class, 'store'])->name('documents.store');
+        Route::get('/{document}/editar', [DocumentController::class, 'edit'])->name('documents.edit');
+        Route::put('/{document}', [DocumentController::class, 'update'])->name('documents.update');
+        Route::delete('/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+    });
+
+    // Rutas para documentos subidos por usuarios
+    Route::prefix('documentos-usuarios')->group(function () {
+        Route::get('/', [UserDocumentController::class, 'index'])->name('user-documents.index');
+        Route::get('/{document}/editar', [UserDocumentController::class, 'edit'])->name('user-documents.edit');
+        Route::put('/{document}', [UserDocumentController::class, 'update'])->name('user-documents.update');
+        Route::get('/{document}', [UserDocumentController::class, 'show'])->name('user-documents.show');
+        Route::delete('/{document}', [UserDocumentController::class, 'destroy'])->name('user-documents.destroy');
+    });
 });
-
-// Deshabilitar el registro público pero mantener las rutas de autenticación necesarias
-Route::middleware('guest')->group(function () {
-    Route::get('login', 'Auth\AuthenticatedSessionController@create')->name('login');
-    Route::post('login', 'Auth\AuthenticatedSessionController@store');
-
-    Route::get('forgot-password', 'Auth\PasswordResetLinkController@create')->name('password.request');
-    Route::post('forgot-password', 'Auth\PasswordResetLinkController@store')->name('password.email');
-    Route::get('reset-password/{token}', 'Auth\NewPasswordController@create')->name('password.reset');
-    Route::post('reset-password', 'Auth\NewPasswordController@store')->name('password.update');
-});
-
-require __DIR__.'/auth.php';

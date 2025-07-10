@@ -2,59 +2,73 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Administrator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
 
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Muestra el perfil del administrador
      */
-    public function edit(Request $request): View
+    public function show()
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $admin = Auth::guard('web')->user();
+        return view('profile.show', compact('admin'));
     }
 
     /**
-     * Update the user's profile information.
+     * Muestra el formulario de edición de perfil
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function edit()
     {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-
-        $request->user()->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        $admin = Auth::guard('web')->user();
+        return view('profile.edit', compact('admin'));
     }
 
     /**
-     * Delete the user's account.
+     * Actualiza la información del perfil
      */
-    public function destroy(Request $request): RedirectResponse
+    public function update(Request $request)
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
+        $admin = Auth::guard('web')->user();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:administrators,email,' . $admin->id],
         ]);
 
-        $user = $request->user();
+        $admin->update($validated);
 
-        Auth::logout();
+        return redirect()->route('profile.show')
+            ->with('success', 'Perfil actualizado correctamente');
+    }
 
-        $user->delete();
+    /**
+     * Muestra el formulario para cambiar la contraseña
+     */
+    public function showChangePassword()
+    {
+        return view('profile.change-password');
+    }
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+    /**
+     * Actualiza la contraseña
+     */
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
 
-        return Redirect::to('/');
+        $admin = Auth::guard('web')->user();
+        $admin->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->route('profile.show')
+            ->with('success', 'Contraseña actualizada correctamente');
     }
 }

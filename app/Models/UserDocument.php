@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class UserDocument extends Model
 {
@@ -11,12 +12,19 @@ class UserDocument extends Model
 
     protected $fillable = [
         'user_id',
-        'required_document_id', // Esta es la clave foránea correcta
+        'required_document_id',
         'file_path',
         'status',
         'admin_notes',
         'comments'
     ];
+
+    /**
+     * Los accesores que deben agregarse a las formas de matriz/JSON.
+     *
+     * @var array
+     */
+    protected $appends = ['document_url'];
 
     /**
      * Obtiene el usuario al que pertenece este documento
@@ -28,7 +36,6 @@ class UserDocument extends Model
 
     /**
      * Obtiene el tipo de documento requerido
-     * Corregimos la relación para usar el nombre de columna correcto
      */
     public function requiredDocument()
     {
@@ -45,5 +52,32 @@ class UserDocument extends Model
             'aprobado' => 'Aprobado',
             'rechazado' => 'Rechazado'
         ];
+    }
+
+    /**
+     * Obtiene la URL completa del documento
+     * Maneja automáticamente las URLs tanto en producción como en desarrollo local
+     *
+     * @return string|null
+     */
+    public function getDocumentUrlAttribute()
+    {
+        // Si no hay ruta de archivo, devolvemos null
+        if (empty($this->file_path)) {
+            return null;
+        }
+        
+        // Si la ruta ya es una URL completa (http:// o https://), la devolvemos tal cual
+        if (filter_var($this->file_path, FILTER_VALIDATE_URL)) {
+            return $this->file_path;
+        }
+        
+        // Si la ruta comienza con 'documents/' o 'storage/documents/', asumimos que es una ruta de almacenamiento
+        if (str_starts_with($this->file_path, 'documents/') || str_starts_with($this->file_path, 'storage/documents/')) {
+            return Storage::url($this->file_path);
+        }
+        
+        // Si la ruta es relativa, asumimos que está en la carpeta documents del usuario
+        return Storage::url('documents/' . $this->user_id . '/' . $this->file_path);
     }
 }

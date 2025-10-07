@@ -11,16 +11,8 @@ class CargoType extends Model
 
     protected $fillable = [
         'name',
-        'description',
-        'requires_refrigeration',
-        'hazardous',
-        'active',
-        'icon'
+        'description'
     ];
-
-    protected $casts = [
-        'requires_refrigeration' => 'boolean',
-        'hazardous' => 'boolean',
-        'active' => 'boolean',
-    ];
+    
+    // No necesitamos $casts ya que no hay campos booleanos en la base de datos
 }

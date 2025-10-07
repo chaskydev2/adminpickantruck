@@ -21,7 +21,7 @@
                 <div class="d-flex align-items-center">
                     <span class="me-2 text-muted small">Mostrar:</span>
                     <select class="form-select form-select-sm border-light" style="width: auto;" onchange="window.location.href=this.value">
-                        @foreach([5, 10, 20] as $perPage)
+                        @foreach([3, 5, 10, 20] as $perPage)
                             <option value="{{ request()->fullUrlWithQuery(['per_page' => $perPage]) }}" 
                                     {{ $paginator->perPage() == $perPage ? 'selected' : '' }}>
                                 {{ $perPage }}

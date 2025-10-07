@@ -293,25 +293,27 @@ class SearchController extends Controller
                     }
                     
                     // Búsqueda por múltiples campos
-                    return $query->where('id', 'like', "%{$search}%")
-                        ->orWhereHas('user', function($q) use ($search) {
-                            $q->where('name', 'like', "%{$search}%")
-                              ->orWhere('email', 'like', "%{$search}%");
-                        })
-                        ->orWhere('monto', 'like', "%{$search}%")
-                        ->orWhere('estado', function($q) use ($search) {
-                            $status = strtolower($search);
-                            if (str_contains($status, 'acept') || str_contains($status, 'aprob')) {
-                                return $q->where('estado', 'aceptado');
-                            } elseif (str_contains($status, 'rechaz') || str_contains($status, 'rechazado')) {
-                                return $q->where('estado', 'rechazado');
-                            } elseif (str_contains($status, 'pendiente') || str_contains($status, 'espera')) {
-                                return $q->where('estado', 'pendiente');
-                            } elseif (str_contains($status, 'cancel') || str_contains($status, 'anul')) {
-                                return $q->where('estado', 'cancelado');
-                            }
-                            return $q->where('estado', 'like', "%{$search}%");
-                        });
+                    return $query->where(function($q) use ($search) {
+                        $q->where('id', 'like', "%{$search}%")
+                          ->orWhere('monto', 'like', "%{$search}%")
+                          ->orWhereHas('user', function($subQuery) use ($search) {
+                              $subQuery->where('name', 'like', "%{$search}%")
+                                      ->orWhere('email', 'like', "%{$search}%");
+                          });
+                    })->orWhere(function($q) use ($search) {
+                        $status = strtolower($search);
+                        if (str_contains($status, 'acept') || str_contains($status, 'aprob')) {
+                            $q->where('estado', 'aceptado');
+                        } elseif (str_contains($status, 'rechaz') || str_contains($status, 'rechazado')) {
+                            $q->where('estado', 'rechazado');
+                        } elseif (str_contains($status, 'pendiente') || str_contains($status, 'espera')) {
+                            $q->where('estado', 'pendiente');
+                        } elseif (str_contains($status, 'cancel') || str_contains($status, 'anul')) {
+                            $q->where('estado', 'cancelado');
+                        } else {
+                            $q->where('estado', 'like', "%{$search}%");
+                        }
+                    });
                 })
                 ->orderBy('created_at', 'desc')
                 ->limit(10)

@@ -11,6 +11,29 @@ use App\Http\Controllers\BidController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Artisan;
+
+
+Route::get('/refresh', function(){
+    Artisan::call('cache:clear');
+    Artisan::call('config:cache');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear ');
+    Artisan::call('optimize:clear');
+    $link = public_path('storage');
+    $target = storage_path('app/public');
+     Artisan::call('storage:link');
+    if (File::exists($link)) {
+        return "El enlace simbólico ya existe.";
+    }
+    try {
+        Artisan::call('storage:link');
+        return "Enlace simbólico creado con éxito.";
+    } catch (\Exception $e) {
+        return "Error al crear el enlace simbólico: " . $e->getMessage();
+    }
+    return "Cleared!";
+});
 
 // Ruta de inicio redirige al login
 Route::get('/', function () {
@@ -49,12 +72,13 @@ Route::middleware(['auth'])->group(function () {
     Route::options('/search/bids', [SearchController::class, 'options']);
     Route::options('/search/global', [SearchController::class, 'options']);
 
-    // Usuarios
-    Route::prefix('usuarios')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('users.index');
-        Route::get('/{user}', [UserController::class, 'show'])->name('users.show');
-        Route::post('/{user}/toggle-verification', [UserController::class, 'toggleVerification'])->name('users.toggle-verification');
-        Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    // Rutas de usuarios
+    Route::prefix('usuarios')->name('users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/{user}', [UserController::class, 'show'])->name('show');
+        Route::post('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
+        Route::post('/{user}/toggle-verification', [UserController::class, 'toggleVerification'])->name('toggle-verification');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
     });
 
     // Cargas
@@ -116,4 +140,5 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{document}', [UserDocumentController::class, 'show'])->name('user-documents.show');
         Route::delete('/{document}', [UserDocumentController::class, 'destroy'])->name('user-documents.destroy');
     });
+
 });

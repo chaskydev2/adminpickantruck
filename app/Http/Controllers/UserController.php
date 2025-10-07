@@ -9,6 +9,18 @@ use Illuminate\View\View; // Importa View para tipo hinting
 class UserController extends Controller
 {
     /**
+     * Cambia el estado de un usuario entre Activo y Bloqueado
+     */
+    public function toggleStatus(User $user)
+    {
+        $user->estado = $user->estado === 'Activo' ? 'Bloqueado' : 'Activo';
+        $user->save();
+
+        return back()->with('success', 'Estado del usuario actualizado correctamente');
+    }
+
+    /**
+    /**
      * Muestra los detalles de un usuario específico.
      */
     public function show(User $user): View
@@ -23,7 +35,7 @@ class UserController extends Controller
                 $query->with('truckType')
                       ->orderBy('fecha_inicio', 'desc');
             },
-            'detail' // Cargar la relación con los detalles del usuario
+            // Los detalles del usuario ahora están en la tabla users
         ]);
             
         return view('users.user_detail_max', compact('user'));
@@ -31,17 +43,21 @@ class UserController extends Controller
     /**
      * Muestra la lista de usuarios.
      */
-    public function index(): View
-    {
-        $users = User::withCount('documents')
-            ->with(['documents' => function($query) {
-                $query->orderBy('created_at', 'desc');
-            }])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-            
-        return view('users.user_list', compact('users'));
-    }
+    public function index()
+{
+    $perPage = request('per_page', 10); // Valor por defecto = 10
+
+    $users = User::withCount('documents')
+        ->with(['documents' => function($query) {
+            $query->orderBy('created_at', 'desc');
+        }])
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPage)
+        ->appends(['per_page' => $perPage]);
+
+    return view('users.user_list', compact('users'));
+}
+
 
     /**
      * Verificar/Desverificar un usuario

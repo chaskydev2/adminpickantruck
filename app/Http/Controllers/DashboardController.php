@@ -6,7 +6,7 @@ use App\Models\Bid;
 use App\Models\OfertaCarga;
 use App\Models\OfertaRuta;
 use App\Models\User;
-use App\Models\UserDetail;
+// UserDetail ha sido eliminado, usando solo User
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -31,8 +31,8 @@ class DashboardController extends Controller
         $usuariosPendientes = User::where('verified', 0)->count();
         $usuariosNuevos = User::where('created_at', '>=', now()->subDays(30))->count();
         
-        // Obtener los últimos 5 usuarios registrados con sus detalles y documentos
-        $latestUsers = User::with(['detail', 'documents'])
+        // Obtener los últimos 5 usuarios registrados con sus documentos
+        $latestUsers = User::with(['documents'])
             ->withCount('documents')
             ->latest()
             ->take(5)
@@ -63,7 +63,7 @@ class DashboardController extends Controller
         $pujasAceptadas = Bid::where('estado', 'aceptado')->count();
         $pujasRechazadas = Bid::where('estado', 'rechazado')->count();
         $pujasPendientes = Bid::where('estado', 'pendiente')->count();
-        $pujasTerminadas = Bid::where('estado', 'terminado')->count();
+        $pujasTerminadas = Bid::whereIn('estado', ['terminado', 'completado'])->count();
         
         // Obtener datos para el gráfico de cargas por tipo de carga
         $cargasPorTipo = \App\Models\OfertaCarga::selectRaw('tipo_carga, COUNT(*) as total')

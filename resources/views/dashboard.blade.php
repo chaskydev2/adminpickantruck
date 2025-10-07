@@ -3,10 +3,28 @@
 @section('content')
 <div style="width: 100%; padding: 20px;">
     <!-- Título del panel -->
+
     <div class="mb-4">
         <h1 style="font-size: 24px; font-weight: 600; color: #1f2937; margin: 0 0 10px 0;">Panel de Control</h1>
         <p style="font-size: 14px; color: #6b7280; margin: 0;">Resumen general de actividades y estadísticas</p>
     </div>
+
+    <!-- Filtro de fechas -->
+    <form action="{{ route('dashboard') }}" method="GET" style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <div>
+                <label for="start_date" style="font-weight: 500; color: #374151ff;">Fecha desde:</label>
+                <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}" style="padding: 5px; border: 1px solid #d1d5db; border-radius: 4px;">
+            </div>
+            <div>
+                <label for="end_date" style="font-weight: 500; color: #374151ff;">Fecha hasta:</label>
+                <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}" style="padding: 5px; border: 1px solid #d1d5db; border-radius: 4px;">
+            </div>
+            <div>
+                <button type="submit" style="background-color: #3b82f6; color: white; padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer;">Filtrar</button>
+            </div>
+        </div>
+    </form>
 
     <!-- Sección de Resúmenes -->
     <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
@@ -32,9 +50,52 @@
     </div>
 
     <!-- Estadísticas de Pujas -->
-    <div style="margin: 20px 0;">
-        <x-dashboard.bids-stats :bidsStats="$bidsStats" />
-    </div>
+<div style="margin: 20px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); background-color: #ffffff;">
+
+    <!-- Filtro de fechas dentro del card -->
+    <form action="{{ route('dashboard') }}" method="GET" style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <div>
+                <label for="start_date" style="font-weight: 500; color: #374151;">Fecha desde:</label>
+                <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}"
+                    style="padding: 5px; border: 1px solid #d1d5db; border-radius: 4px;">
+            </div>
+            <div>
+                <label for="end_date" style="font-weight: 500; color: #374151;">Fecha hasta:</label>
+                <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}"
+                    style="padding: 5px; border: 1px solid #d1d5db; border-radius: 4px;">
+            </div>
+            <div>
+                <button type="submit"
+                    style="background-color: #3b82f6; color: white; padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer;">
+                    Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Componente de estadísticas -->
+    <x-dashboard.bids-stats :bidsStats="$bidsStats" />
+</div>
+
+
+
+    <!-- Filtro de fechas -->
+    <form action="{{ route('dashboard') }}" method="GET" style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <div>
+                <label for="start_date" style="font-weight: 500; color: #374151ff;">Fecha desde:</label>
+                <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}" style="padding: 5px; border: 1px solid #d1d5db; border-radius: 4px;">
+            </div>
+            <div>
+                <label for="end_date" style="font-weight: 500; color: #374151ff;">Fecha hasta:</label>
+                <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}" style="padding: 5px; border: 1px solid #d1d5db; border-radius: 4px;">
+            </div>
+            <div>
+                <button type="submit" style="background-color: #3b82f6; color: white; padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer;">Filtrar</button>
+            </div>
+        </div>
+    </form>
 
     <!-- Sección de Gráficos -->
     <div class="row" style="margin-bottom: 20px;">

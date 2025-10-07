@@ -20,7 +20,7 @@ class DocumentController extends Controller
             ->orderBy('name')
             ->paginate(15);
             
-        return view('documents.document_list', compact('documents'));
+        return view('Documents.document_list', compact('documents'));
     }
 
     /**
@@ -28,7 +28,7 @@ class DocumentController extends Controller
      */
     public function create(): View
     {
-        return view('documents.document_form');
+        return view('Documents.document_form');
     }
 
     /**
@@ -54,7 +54,7 @@ class DocumentController extends Controller
      */
     public function edit(RequiredDocument $document): View
     {
-        return view('documents.document_form', compact('document'));
+        return view('Documents.document_form', compact('document'));
     }
 
     /**

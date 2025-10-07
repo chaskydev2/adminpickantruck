@@ -15,20 +15,11 @@ class TruckType extends Model
     protected $fillable = [
         'name',
         'description',
-        'max_weight',
-        'length',
-        'width',
-        'height',
-        'active',
-        'icon'
+        'active'
     ];
 
     protected $casts = [
-        'max_weight' => 'float',
-        'length' => 'float',
-        'width' => 'float',
-        'height' => 'float',
-        'active' => 'boolean',
+        'active' => 'boolean'
     ];
 
     /**

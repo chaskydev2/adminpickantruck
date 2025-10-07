@@ -36,12 +36,12 @@
                         @else
                             <span class="badge bg-warning text-dark">No Verificado</span>
                         @endif
-                        @if(isset($user->detail->role))
-                            @if($user->detail->role === 'forwarder')
+                        @if(isset($user->role))
+                            @if($user->role === 'forwarder')
                                 <span class="badge bg-success">Forwarder</span>
-                            @elseif($user->detail->role === 'carrier')
+                            @elseif($user->role === 'carrier')
                                 <span class="badge bg-primary">Transportista</span>
-                            @elseif($user->detail->role === 'admin')
+                            @elseif($user->role === 'admin')
                                 <span class="badge bg-danger">Administrador</span>
                             @endif
                         @else
@@ -65,18 +65,41 @@
                     <h5 class="card-title mb-3">Información de Contacto</h5>
                     <div class="mb-3">
                         <p class="mb-1 text-muted">Teléfono</p>
-                        <p class="mb-0">{{ $user->detail->phone ?? 'No especificado' }}</p>
+                        <p class="mb-0">
+                            @if(isset($user->empresa) && $user->empresa->telefono)
+                                {{ $user->empresa->telefono }}
+                            @else
+                                No especificado
+                            @endif
+                        </p>
                     </div>
                     <div class="mb-3">
                         <p class="mb-1 text-muted">Dirección</p>
-                        <p class="mb-0">{{ $user->detail->address ?? 'No especificada' }}</p>
+                        <p class="mb-0">
+                            @if(isset($user->empresa) && $user->empresa->direccion)
+                                {{ $user->empresa->direccion }}
+                            @else
+                                No especificada
+                            @endif
+                        </p>
                     </div>
 
                     <div>
+                        <p class="mb-1 text-muted">Sitio Web</p>
+                        <p class="mb-0">
+                            @if(isset($user->empresa) && $user->empresa->sitio_web)
+                                <a href="{{ $user->empresa->sitio_web }}" target="_blank">{{ $user->empresa->sitio_web }}</a>
+                            @else
+                                No especificado
+                            @endif
+                        </p>
+                    </div>
+
+                    <div class="mt-3">
                         <p class="mb-1 text-muted">Último Acceso</p>
                         <p class="mb-0">
-                            @if(isset($user->detail->last_login_at) && $user->detail->last_login_at)
-                                {{ $user->detail->last_login_at->diffForHumans() }}
+                            @if(isset($user->last_login_at) && $user->last_login_at)
+                                {{ $user->last_login_at->diffForHumans() }}
                             @else
                                 Nunca
                             @endif
@@ -129,13 +152,15 @@
                                         <tr>
                                             <th class="ps-0">Rol:</th>
                                             <td>
-                                                @if(isset($user->detail->role))
-                                                    @if($user->detail->role === 'forwarder')
+                                                @if(isset($user->role))
+                                                    @if($user->role === 'forwarder')
                                                         <span class="badge bg-success">Forwarder</span>
-                                                    @elseif($user->detail->role === 'carrier')
+                                                    @elseif($user->role === 'carrier')
                                                         <span class="badge bg-primary">Transportista</span>
-                                                    @elseif($user->detail->role === 'admin')
+                                                    @elseif($user->role === 'admin')
                                                         <span class="badge bg-danger">Administrador</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">{{ ucfirst($user->role) }}</span>
                                                     @endif
                                                 @else
                                                     <span class="badge bg-secondary">Sin rol asignado</span>
@@ -145,10 +170,10 @@
                                         <tr>
                                             <th class="ps-0">Estado de la Cuenta:</th>
                                             <td>
-                                                @if(isset($user->email_verified_at))
+                                                @if($user->verified)
                                                     <span class="badge bg-success">Verificado</span>
                                                 @else
-                                                    <span class="badge bg-warning text-dark">Pendiente de Verificación</span>
+                                                    <span class="badge bg-warning text-dark">Sin verificar</span>
                                                 @endif
                                             </td>
                                         </tr>

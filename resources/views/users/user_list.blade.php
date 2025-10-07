@@ -6,13 +6,15 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div class="d-flex align-items-center">
         <h2 class="mb-0 me-4">Lista de Usuarios</h2>
-    </div>
+    </div>    
     <div id="search-user-component">
         <search-user></search-user>
     </div>
 </div>
 
-<x-paginator :paginator="$users" />
+<div class="mb-2" style="max-width: 250px;">
+    <input type="text" id="searchByName" class="form-control" placeholder="Buscar por nombre...">
+</div>
 
 <div class="card shadow-sm mt-3">
     <div class="card-body p-0">
@@ -26,6 +28,7 @@
                         <th>Rol</th>
                         <th>Documentos</th>
                         <th>Fecha de Registro</th>
+                        <th>Verificado</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
@@ -34,17 +37,17 @@
                     @forelse($users as $user)
                     <tr class="user-row" data-user-id="{{ $user->id }}">
                         <td class="fw-semibold">#{{ $user->id }}</td>
-                        <td>{{ $user->name }}</td>
+                        <td class="user-name">{{ $user->name}}</td>
                         <td>{{ $user->email }}</td>
                         <td>
-                            @if($user->detail && $user->detail->role)
+                            @if($user->role)
                                 @php
-                                    $roleText = $user->detail->role === 'carrier' ? 'Transportista' : 
-                                              ($user->detail->role === 'admin' ? 'Administrador' : ucfirst($user->detail->role));
+                                    $roleText = $user->role === 'carrier' ? 'Transportista' : 
+                                              ($user->role === 'admin' ? 'Administrador' : ucfirst($user->role));
                                 @endphp
                                 <span class="badge bg-{{ 
-                                    $user->detail->role === 'admin' ? 'danger' : 
-                                    (in_array($user->detail->role, ['carrier', 'transportista']) ? 'primary' : 'secondary') 
+                                    $user->role === 'admin' ? 'danger' : 
+                                    (in_array($user->role, ['carrier', 'transportista']) ? 'primary' : 'secondary') 
                                 }}">
                                     {{ $roleText }}
                                 </span>
@@ -66,6 +69,15 @@
                             @endif
                         </td>
                         <td>
+                            @if($user->estado === 'Bloqueado')
+                                <span class="badge bg-danger">Bloqueado</span>
+                            @elseif($user->estado === 'Activo')
+                                <span class="badge bg-success">Activo</span>
+                            @else
+                                <span class="badge bg-secondary">Sin estado</span>
+                            @endif
+                        </td>
+                        <td>
                             <div class="btn-group" role="group">
                                 <button type="button" 
                                         class="btn btn-sm btn-outline-info toggle-documents" 
@@ -80,6 +92,17 @@
                                    title="Ver detalles">
                                     <i class="fas fa-eye"></i>
                                 </a>
+                                <form action="{{ route('users.toggle-status', $user->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('POST')
+                                    <button type="submit" 
+                                            class="btn btn-sm {{ $user->estado === 'Bloqueado' ? 'btn-outline-success' : 'btn-outline-danger' }}" 
+                                            data-bs-toggle="tooltip" 
+                                            title="{{ $user->estado === 'Bloqueado' ? 'Desbloquear usuario' : 'Bloquear usuario' }}"
+                                            onclick="return confirm('¿Estás seguro de {{ $user->estado === 'Bloqueado' ? 'desbloquear' : 'bloquear' }} a este usuario?')">
+                                        <i class="fas {{ $user->estado === 'Bloqueado' ? 'fa-unlock' : 'fa-lock' }}"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -172,12 +195,36 @@
         </div>
     </div>
 </div>
+<div class="mt-4">
+    <x-paginator :paginator="$users" />
+</div>
 
 @include('components.validation-modal')
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Buscador por nombre
+const searchInput = document.getElementById('searchByName');
+searchInput.addEventListener('input', function() {
+    const filter = this.value.toLowerCase();
+    document.querySelectorAll('tr.user-row').forEach(function(row) {
+        const nameCell = row.querySelector('.user-name');
+        const name = nameCell ? nameCell.textContent.toLowerCase() : '';
+        // Mostrar/ocultar fila según búsqueda
+        if (name.includes(filter)) {
+            row.style.display = '';
+        // Oculta la fila de detalle asociada
+        } else {
+            row.style.display = 'none';
+        }
+        // Siempre oculta la fila de detalle asociada al filtrar
+        const userId = row.getAttribute('data-user-id');
+        const detailRow = document.getElementById(`detail-row-${userId}`);
+        if (detailRow) detailRow.style.display = 'none';
+    });
+});
+    
     // Inicializar tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.forEach(function (tooltipTriggerEl) {

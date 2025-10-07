@@ -11,21 +11,29 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_details', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->string('phone')->nullable();
-            $table->text('address')->nullable();
-            $table->timestamp('last_login_at')->nullable();
-            $table->enum('role', ['carrier', 'forwarder', 'admin'])->default('forwarder');
-            $table->timestamps();
+        if (!Schema::hasTable('user_details')) {
+            Schema::create('user_details', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('user_id');
+                $table->string('phone', 20)->nullable();
+                $table->text('address')->nullable();
+                $table->timestamp('last_login_at')->nullable();
+                $table->enum('role', ['carrier', 'forwarder', 'admin'])->default('forwarder');
+                $table->timestamps();
+                
+                // Clave foránea con nombre específico para evitar conflictos
+                $table->foreign('user_id', 'user_details_user_id_foreign')
+                      ->references('id')
+                      ->on('users')
+                      ->onDelete('cascade');
+                
+                // Índice único para user_id para asegurar relación 1:1
+                $table->unique('user_id');
+            });
             
-            // Clave foránea
-            $table->foreign('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
-        });
+            // Si la tabla users ya tiene datos, podríamos crear registros iniciales aquí
+            // Pero eso debería manejarse con un seeder en lugar de en la migración
+        }
     }
 
     /**
@@ -33,6 +41,17 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_details');
+        // Primero eliminamos la clave foránea si existe
+        if (Schema::hasTable('user_details')) {
+            Schema::table('user_details', function (Blueprint $table) {
+                // Eliminar la restricción de clave foránea si existe
+                $table->dropForeign('user_details_user_id_foreign');
+                // Eliminar el índice único si existe
+                $table->dropUnique('user_details_user_id_unique');
+            });
+            
+            // Luego eliminamos la tabla
+            Schema::dropIfExists('user_details');
+        }
     }
 };

@@ -20,8 +20,7 @@
                     <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>Pendientes</option>
                     <option value="aceptado" {{ request('estado') == 'aceptado' ? 'selected' : '' }}>Aceptadas</option>
                     <option value="rechazado" {{ request('estado') == 'rechazado' ? 'selected' : '' }}>Rechazadas</option>
-                    <option value="completado" {{ request('estado') == 'completado' ? 'selected' : '' }}>Completadas</option>
-                    <option value="cancelado" {{ request('estado') == 'cancelado' ? 'selected' : '' }}>Canceladas</option>
+                    <option value="terminado" {{ request('estado') == 'terminado' ? 'selected' : '' }}>Terminadas</option>
                 </select>
                 @if(request('estado'))
                     <a href="{{ route('bids.index') }}" class="btn btn-outline-secondary btn-sm ms-2">

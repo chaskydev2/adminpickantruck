@@ -10,20 +10,17 @@ return new class extends Migration
     {
         Schema::create('truck_types', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->text('descripcion')->nullable();
-            $table->decimal('capacidad_kg', 10, 2);
-            $table->decimal('largo', 8, 2);
-            $table->decimal('ancho', 8, 2);
-            $table->decimal('alto', 8, 2);
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
 
         // Insertar tipos de camión por defecto
         DB::table('truck_types')->insert([
-            ['nombre' => 'Camión Cerrado', 'descripcion' => 'Caja cerrada estándar', 'capacidad_kg' => 10000, 'largo' => 13.6, 'ancho' => 2.4, 'alto' => 2.7],
-            ['nombre' => 'Torton', 'descripcion' => 'Caja cerrada grande', 'capacidad_kg' => 15000, 'largo' => 15.0, 'ancho' => 2.5, 'alto' => 2.8],
-            ['nombre' => 'Rabón', 'descripcion' => 'Caja cerrada corta', 'capacidad_kg' => 7000, 'largo' => 8.5, 'ancho' => 2.4, 'alto' => 2.7],
+            ['name' => 'Camión Plataforma', 'description' => 'Camión con plataforma', 'active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Camión Caja', 'description' => 'Camión con caja cerrada', 'active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Camión Refrigerado', 'description' => 'Camión con refrigeración', 'active' => 1, 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 

@@ -23,8 +23,13 @@ class BidController extends Controller
         $query = Bid::with(['user', 'bideable']);
         
         // Aplicar filtro por estado si se especificó
-        if ($estado && in_array($estado, ['pendiente', 'aceptado', 'rechazado', 'completado', 'cancelado'])) {
-            $query->where('estado', $estado);
+        if ($estado) {
+            if (in_array($estado, ['pendiente', 'aceptado', 'rechazado', 'cancelado'])) {
+                $query->where('estado', $estado);
+            } elseif (in_array($estado, ['completado', 'terminado'])) {
+                // Manejar tanto 'completado' como 'terminado' como equivalentes
+                $query->whereIn('estado', ['completado', 'terminado']);
+            }
         }
         
         $bids = $query->latest()

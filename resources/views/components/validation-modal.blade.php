@@ -11,29 +11,41 @@
     <!-- Contenido del modal -->
     <div class="position-absolute top-50 start-50 translate-middle" style="z-index: 10000; width: 90%; max-width: 800px;">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-            <div class="modal-header bg-white border-bottom">
+            <div class="modal-header bg-white border-bottom" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);">
                 <h5 class="modal-title fw-bold text-dark">Validar Documento</h5>
                 <button type="button" class="btn-close" onclick="hideModal()" aria-label="Cerrar"></button>
             </div>
-            <div class="modal-body text-center" style="max-height: 60vh; overflow-y: auto;">
+            <div class="modal-body text-center p-0" style="max-height: 70vh; overflow-y: auto;">
                 <div class="mb-4">
-                    <div class="bg-light p-5 rounded-3 border" style="background-color: #f8fafc !important;">
-                        <div class="bg-white p-4 rounded-3 shadow-sm mb-3">
-                            <i class="fas fa-image fa-5x text-muted mb-3" style="color: #e2e8f0 !important;"></i>
-                            <h5 class="fw-semibold text-muted mb-2">Vista previa no disponible</h5>
-                            <p class="text-muted mb-0">La vista previa del documento no está disponible en modo local.</p>
+                    <div class="bg-light p-3 rounded-3 border shadow-sm" style="background-color: #f8fafc !important;">
+                        <div class="bg-white p-4 rounded-3 shadow-sm mb-3" id="documentPreview" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
+                            <!-- El contenido se cargará dinámicamente con JavaScript -->
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Cargando documento...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-center gap-2">
+                <div class="d-flex justify-content-center gap-2 p-3">
                     <form id="validateDocumentForm" method="POST" action="" class="w-100">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="status" value="aprobado">
-                        <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top">
-                            <button type="submit" class="btn btn-success px-4" id="validateButton">
-                                <i class="fas fa-check me-2"></i> Validar Documento
-                            </button>
+                        <div class="d-flex justify-content-between align-items-center gap-3 mt-3 pt-3 border-top">
+                            <a href="#" id="downloadDocument" class="btn btn-outline-primary shadow-sm" target="_blank" style="display: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
+                                <i class="fas fa-download me-2"></i> Descargar
+                            </a>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary shadow-sm" onclick="rejectDocument()" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
+                                    <i class="fas fa-times me-2"></i> Rechazar
+                                </button>
+                                <button type="submit" class="btn btn-success shadow-sm" id="validateButton" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
+                                    <i class="fas fa-check me-2"></i> Aprobar
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>

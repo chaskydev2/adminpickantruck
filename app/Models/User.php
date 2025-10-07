@@ -18,11 +18,11 @@ class User extends Authenticatable
      * Get the ofertas de carga for the user.
      */
     /**
-     * Obtiene los detalles adicionales del usuario.
+     * Obtiene la empresa asociada al usuario.
      */
-    public function detail(): HasOne
+    public function empresa()
     {
-        return $this->hasOne(UserDetail::class);
+        return $this->hasOne(Empresa::class);
     }
 
     /**
@@ -58,7 +58,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
         'verified',
+        'estado',
+        'last_login_at',
     ];
 
     /**
@@ -81,6 +84,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'verified' => 'boolean',
+            'estado' => 'string',
+            'last_login_at' => 'datetime',
         ];
     }
 }

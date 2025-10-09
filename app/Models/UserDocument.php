@@ -72,12 +72,26 @@ class UserDocument extends Model
             return $this->file_path;
         }
         
-        // Si la ruta comienza con 'documents/' o 'storage/documents/', asumimos que es una ruta de almacenamiento
-        if (str_starts_with($this->file_path, 'documents/') || str_starts_with($this->file_path, 'storage/documents/')) {
-            return Storage::url($this->file_path);
+        // IMPORTANTE: Los documentos están guardados en el servidor principal (pickandtruckfinal)
+        // que corre en http://localhost:8000 y guarda los archivos en public/documents
+        // La ruta guardada en BD es relativa: "documents/{userId}/{filename}"
+        
+        // URL del servidor principal donde están los archivos
+        $mainAppUrl = env('MAIN_APP_URL', 'http://localhost:8000');
+        
+        // Si la ruta comienza con 'documents/', construir URL completa al servidor principal
+        if (str_starts_with($this->file_path, 'documents/')) {
+            return $mainAppUrl . '/' . $this->file_path;
+        }
+        
+        // Si la ruta comienza con 'storage/documents/', ajustar
+        if (str_starts_with($this->file_path, 'storage/documents/')) {
+            // Remover 'storage/' porque en pickandtruckfinal está en public/documents
+            $relativePath = str_replace('storage/', '', $this->file_path);
+            return $mainAppUrl . '/' . $relativePath;
         }
         
         // Si la ruta es relativa, asumimos que está en la carpeta documents del usuario
-        return Storage::url('documents/' . $this->user_id . '/' . $this->file_path);
+        return $mainAppUrl . '/documents/' . $this->user_id . '/' . $this->file_path;
     }
 }

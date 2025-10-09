@@ -18,7 +18,7 @@
             <div class="modal-body text-center p-0" style="max-height: 70vh; overflow-y: auto;">
                 <div class="mb-4">
                     <div class="bg-light p-3 rounded-3 border shadow-sm" style="background-color: #f8fafc !important;">
-                        <div class="bg-white p-4 rounded-3 shadow-sm mb-3" id="documentPreview" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
+                        <div class="bg-white p-4 rounded-3 shadow-sm mb-3 d-flex justify-content-center align-items-center" id="documentPreview" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important; min-height: 400px;">
                             <!-- El contenido se cargará dinámicamente con JavaScript -->
                             <div class="text-center py-4">
                                 <div class="spinner-border text-primary" role="status">
@@ -94,6 +94,72 @@ function hideModal() {
     }
 }
 
+// Función para cargar la vista previa del documento
+function loadDocumentPreview(documentId) {
+    const previewContainer = document.getElementById('documentPreview');
+    const downloadLink = document.getElementById('downloadDocument');
+    
+    // Mostrar indicador de carga
+    previewContainer.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 text-muted">Cargando documento...</p>
+        </div>
+    `;
+    
+    // Hacer petición para obtener los datos del documento
+    fetch('/documentos-usuarios/' + documentId, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al cargar el documento');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // El documento viene del servidor con su información
+        const document = data.document || data;
+        
+        // Usar el atributo document_url que ya viene procesado del modelo
+        let documentUrl = document.document_url || '';
+        
+        if (!documentUrl) {
+            throw new Error('No se encontró la ruta del documento');
+        }
+        
+        // Actualizar el enlace de descarga
+        downloadLink.href = documentUrl;
+        downloadLink.style.display = 'inline-block';
+        
+        // Determinar el tipo de archivo
+        const fileExtension = (document.file_path || '').split('.').pop().toLowerCase();
+        
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+            // Es una imagen - centrada
+            previewContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center w-100"><img src="' + documentUrl + '" alt="Documento" class="img-fluid rounded shadow-sm" style="max-width: 90%; height: auto; max-height: 500px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.onerror=null; this.parentElement.innerHTML=\'<div class=\\\'alert alert-danger text-center\\\'>Error al cargar la imagen. Asegúrate de que el servidor principal (pickandtruckfinal) esté ejecutándose en http://localhost:8000</div>\';"></div>';
+        } else if (fileExtension === 'pdf') {
+            // Es un PDF - ocupa todo el ancho
+            previewContainer.innerHTML = '<div class="w-100"><iframe src="' + documentUrl + '" style="width: 100%; height: 500px; border: none; border-radius: 8px; display: block;"></iframe></div>';
+        } else {
+            // Otro tipo de archivo - centrado
+            previewContainer.innerHTML = '<div class="alert alert-info text-center mx-auto" style="max-width: 500px;"><i class="fas fa-file me-2"></i> No se puede mostrar una vista previa de este tipo de archivo. <br><a href="' + documentUrl + '" target="_blank" class="btn btn-sm btn-primary mt-2"><i class="fas fa-download me-1"></i> Descargar archivo</a></div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        previewContainer.innerHTML = '<div class="alert alert-danger text-center mx-auto" style="max-width: 600px;"><i class="fas fa-exclamation-circle me-2"></i> Error al cargar el documento: ' + error.message + '<br><br><strong>Nota:</strong> Los documentos están almacenados en el servidor principal de pickandtruckfinal (http://localhost:8000). Asegúrate de que ese servidor esté en funcionamiento.</div>';
+        downloadLink.style.display = 'none';
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const validationModal = document.getElementById('validationModal');
     const closeButton = document.getElementById('closeModal');
@@ -125,6 +191,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     validateButton.classList.remove('btn-outline-success');
                     validateButton.classList.add('btn-success');
                 }
+                
+                // Cargar el documento
+                loadDocumentPreview(documentId);
                 
                 // Mostrar el modal
                 showModal();

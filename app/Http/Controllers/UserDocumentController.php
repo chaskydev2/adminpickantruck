@@ -59,9 +59,18 @@ class UserDocumentController extends Controller
     /**
      * Muestra los detalles de un documento específico.
      */
-    public function show(UserDocument $document): View
+    public function show(UserDocument $document): View|\Illuminate\Http\JsonResponse
     {
         $document->load(['user', 'requiredDocument']);
+        
+        // Si es una petición AJAX, devolver JSON
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'document' => $document
+            ]);
+        }
+        
         return view('user_documents.show', compact('document'));
     }
 

@@ -18,6 +18,10 @@
     @vite(['resources/js/app.js'])
 @endpush
 
+<div class="mb-3">
+    <input type="text" id="searchCargas" class="form-control" placeholder="Buscar por ID, Usuario, Tipo de Carga, Origen o Destino..." style="max-width: 500px;">
+</div>
+
 {{-- Paginación personalizada --}}
 <x-paginator :paginator="$cargas" />
 
@@ -41,7 +45,12 @@
                 </thead>
                 <tbody>
                     @forelse($cargas as $carga)
-                        <tr>
+                        <tr class="carga-row"
+                            data-carga-id="{{ $carga->id }}"
+                            data-usuario="{{ $carga->user->name }}"
+                            data-tipo-carga="{{ $carga->cargoType->name ?? 'N/A' }}"
+                            data-origen="{{ $carga->origen }}"
+                            data-destino="{{ $carga->destino }}">
                             <td>#{{ $carga->id }}</td>
                             <td>
                                 <a href="{{ route('users.show', $carga->user_id) }}" 
@@ -100,11 +109,35 @@ document.addEventListener('DOMContentLoaded', function() {
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-            const searchInput = this.querySelector('input[type="search"]');
-            if (searchInput && searchInput.value.trim() !== '') {
-                // Aquí puedes implementar la lógica de búsqueda
-                console.log('Buscando:', searchInput.value.trim());
-            }
+
+    // Buscador de cargas
+    const searchInput = document.getElementById('searchCargas');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const filter = this.value.toLowerCase().trim();
+            
+            document.querySelectorAll('tr.carga-row').forEach(function(row) {
+                const cargaId = (row.getAttribute('data-carga-id') || '').toString();
+                const usuario = (row.getAttribute('data-usuario') || '').toLowerCase();
+                const tipoCarga = (row.getAttribute('data-tipo-carga') || '').toLowerCase();
+                const origen = (row.getAttribute('data-origen') || '').toLowerCase();
+                const destino = (row.getAttribute('data-destino') || '').toLowerCase();
+                
+                // Verificar si coincide con ID, usuario, tipo de carga, origen o destino
+                const matchesSearch = filter === '' || 
+                                      cargaId.includes(filter) || 
+                                      usuario.includes(filter) || 
+                                      tipoCarga.includes(filter) || 
+                                      origen.includes(filter) || 
+                                      destino.includes(filter);
+                
+                // Mostrar/ocultar fila
+                if (matchesSearch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         });
     }
 });
@@ -122,6 +155,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     .btn-group .btn {
         padding: 0.25rem 0.5rem;
+    }
+    /* Estilos para el buscador */
+    #searchCargas {
+        border: 1px solid #dee2e6;
+        transition: all 0.2s;
+        padding: 0.5rem 0.75rem;
+    }
+    #searchCargas:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        outline: 0;
     }
 </style>
 @endpush

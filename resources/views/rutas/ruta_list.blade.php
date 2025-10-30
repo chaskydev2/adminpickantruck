@@ -18,6 +18,10 @@
     @vite(['resources/js/app.js'])
 @endpush
 
+<div class="mb-3">
+    <input type="text" id="searchRutas" class="form-control" placeholder="Buscar por ID, Usuario, Tipo de Camión, Origen o Destino..." style="max-width: 500px;">
+</div>
+
 {{-- Paginación personalizada --}}
 <x-paginator :paginator="$rutas" />
 
@@ -41,7 +45,12 @@
                 </thead>
                 <tbody>
                     @forelse($rutas as $ruta)
-                        <tr>
+                        <tr class="ruta-row"
+                            data-ruta-id="{{ $ruta->id }}"
+                            data-usuario="{{ $ruta->user->name }}"
+                            data-tipo-camion="{{ $ruta->truckType->name ?? 'N/A' }}"
+                            data-origen="{{ $ruta->origen }}"
+                            data-destino="{{ $ruta->destino }}">
                             <td>#{{ $ruta->id }}</td>
                             <td>
                                 <a href="{{ route('users.show', $ruta->user_id) }}" 
@@ -98,8 +107,62 @@
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+
+        // Buscador de rutas
+        const searchInput = document.getElementById('searchRutas');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const filter = this.value.toLowerCase().trim();
+                
+                document.querySelectorAll('tr.ruta-row').forEach(function(row) {
+                    const rutaId = (row.getAttribute('data-ruta-id') || '').toString();
+                    const usuario = (row.getAttribute('data-usuario') || '').toLowerCase();
+                    const tipoCamion = (row.getAttribute('data-tipo-camion') || '').toLowerCase();
+                    const origen = (row.getAttribute('data-origen') || '').toLowerCase();
+                    const destino = (row.getAttribute('data-destino') || '').toLowerCase();
+                    
+                    // Verificar si coincide con ID, usuario, tipo de camión, origen o destino
+                    const matchesSearch = filter === '' || 
+                                          rutaId.includes(filter) || 
+                                          usuario.includes(filter) || 
+                                          tipoCamion.includes(filter) || 
+                                          origen.includes(filter) || 
+                                          destino.includes(filter);
+                    
+                    // Mostrar/ocultar fila
+                    if (matchesSearch) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
     });
 </script>
+@endpush
+
+@push('styles')
+<style>
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    .badge {
+        font-size: 0.8em;
+        font-weight: 500;
+    }
+    /* Estilos para el buscador */
+    #searchRutas {
+        border: 1px solid #dee2e6;
+        transition: all 0.2s;
+        padding: 0.5rem 0.75rem;
+    }
+    #searchRutas:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        outline: 0;
+    }
+</style>
 @endpush
 
 @endsection

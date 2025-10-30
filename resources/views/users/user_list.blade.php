@@ -12,8 +12,24 @@
     </div>
 </div>
 
-<div class="mb-2" style="max-width: 250px;">
-    <input type="text" id="searchByName" class="form-control" placeholder="Buscar por nombre...">
+<div class="d-flex gap-2 mb-3">
+    <div style="flex: 1; max-width: 350px;">
+        <input type="text" id="searchByName" class="form-control" placeholder="Buscar por nombre, ID o correo...">
+    </div>
+    <div style="min-width: 180px;">
+        <select id="filterByRole" class="form-select">
+            <option value="">Todos</option>
+            <option value="forwarder">Forwarder</option>
+            <option value="carrier">Transportista</option>
+        </select>
+    </div>
+    <div style="min-width: 180px;">
+        <select id="filterByDocuments" class="form-select">
+            <option value="">Todos</option>
+            <option value="with">Con Documentos</option>
+            <option value="without">Sin Documentos</option>
+        </select>
+    </div>
 </div>
 
 <div class="card shadow-sm mt-3">
@@ -35,7 +51,7 @@
                 </thead>
                 <tbody>
                     @forelse($users as $user)
-                    <tr class="user-row" data-user-id="{{ $user->id }}">
+                    <tr class="user-row" data-user-id="{{ $user->id }}" data-role="{{ $user->role ?? '' }}" data-documents-count="{{ $user->documents_count }}" data-email="{{ $user->email }}">
                         <td class="fw-semibold">#{{ $user->id }}</td>
                         <td class="user-name">{{ $user->name}}</td>
                         <td>{{ $user->email }}</td>
@@ -204,26 +220,66 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Buscador por nombre
-const searchInput = document.getElementById('searchByName');
-searchInput.addEventListener('input', function() {
-    const filter = this.value.toLowerCase();
-    document.querySelectorAll('tr.user-row').forEach(function(row) {
-        const nameCell = row.querySelector('.user-name');
-        const name = nameCell ? nameCell.textContent.toLowerCase() : '';
-        // Mostrar/ocultar fila según búsqueda
-        if (name.includes(filter)) {
-            row.style.display = '';
-        // Oculta la fila de detalle asociada
-        } else {
-            row.style.display = 'none';
-        }
-        // Siempre oculta la fila de detalle asociada al filtrar
-        const userId = row.getAttribute('data-user-id');
-        const detailRow = document.getElementById(`detail-row-${userId}`);
-        if (detailRow) detailRow.style.display = 'none';
-    });
-});
+    // Función para aplicar todos los filtros
+    function applyFilters() {
+        const searchFilter = document.getElementById('searchByName').value.toLowerCase();
+        const roleFilter = document.getElementById('filterByRole').value.toLowerCase();
+        const documentsFilter = document.getElementById('filterByDocuments').value;
+        
+        document.querySelectorAll('tr.user-row').forEach(function(row) {
+            const nameCell = row.querySelector('.user-name');
+            const name = nameCell ? nameCell.textContent.toLowerCase() : '';
+            const userId = row.getAttribute('data-user-id');
+            const id = userId ? userId.toString() : '';
+            const email = (row.getAttribute('data-email') || '').toLowerCase();
+            
+            // Obtener el rol del usuario desde el atributo data-role
+            const userRole = row.getAttribute('data-role') || '';
+            
+            // Obtener el número de documentos
+            const documentsCount = parseInt(row.getAttribute('data-documents-count')) || 0;
+            
+            // Verificar búsqueda por nombre, ID o correo
+            const matchesSearch = searchFilter === '' || 
+                                  name.includes(searchFilter) || 
+                                  id.includes(searchFilter) ||
+                                  email.includes(searchFilter);
+            
+            // Verificar filtro de rol
+            const matchesRole = roleFilter === '' || userRole === roleFilter;
+            
+            // Verificar filtro de documentos
+            let matchesDocuments = true;
+            if (documentsFilter === 'with') {
+                matchesDocuments = documentsCount > 0;
+            } else if (documentsFilter === 'without') {
+                matchesDocuments = documentsCount === 0;
+            }
+            
+            // Mostrar/ocultar fila según todos los filtros
+            if (matchesSearch && matchesRole && matchesDocuments) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+            
+            // Siempre oculta la fila de detalle asociada al filtrar
+            const detailRow = document.getElementById(`detail-row-${userId}`);
+            if (detailRow) detailRow.style.display = 'none';
+        });
+    }
+    
+    // Buscador por nombre o ID
+    const searchInput = document.getElementById('searchByName');
+    searchInput.addEventListener('input', applyFilters);
+    
+    // Selector de rol
+    const roleFilter = document.getElementById('filterByRole');
+    roleFilter.addEventListener('change', applyFilters);
+    
+    // Selector de documentos
+    const documentsFilter = document.getElementById('filterByDocuments');
+    documentsFilter.addEventListener('change', applyFilters);
     
     // Inicializar tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -376,6 +432,21 @@ searchInput.addEventListener('input', function() {
 .toggle-documents.active {
     background-color: #0dcaf0;
     color: white;
+}
+
+/* Estilos para los filtros */
+#searchByName, #filterByRole, #filterByDocuments {
+    border: 1px solid #dee2e6;
+    transition: all 0.2s;
+}
+
+#searchByName:focus, #filterByRole:focus, #filterByDocuments:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.d-flex.gap-2 {
+    gap: 0.5rem !important;
 }
 </style>
 @endpush

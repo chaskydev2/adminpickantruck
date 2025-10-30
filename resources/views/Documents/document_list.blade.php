@@ -65,6 +65,17 @@
     .modal-backdrop {
         opacity: 0.5 !important;
     }
+    /* Estilos para el buscador */
+    #searchDocuments {
+        border: 1px solid #dee2e6;
+        transition: all 0.2s;
+        padding: 0.5rem 0.75rem;
+    }
+    #searchDocuments:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        outline: 0;
+    }
 </style>
 @endpush
 
@@ -78,6 +89,10 @@
             <search-document></search-document>
         </div>
     </div>
+</div>
+
+<div class="mb-3">
+    <input type="text" id="searchDocuments" class="form-control" placeholder="Buscar por ID, Nombre o Descripción..." style="max-width: 400px;">
 </div>
 
 @push('scripts')
@@ -137,7 +152,10 @@
                 </thead>
                 <tbody>
                     @forelse($documents as $document)
-                        <tr>
+                        <tr class="document-row" 
+                            data-document-id="{{ $document->id }}"
+                            data-document-name="{{ $document->name }}"
+                            data-document-description="{{ $document->description }}">
                             <td>#{{ $document->id }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
@@ -306,6 +324,40 @@
                 modal.show();
             });
         });
+
+        // Buscador de documentos
+        const searchInput = document.getElementById('searchDocuments');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const filter = this.value.toLowerCase().trim();
+                
+                document.querySelectorAll('tr.document-row').forEach(function(row) {
+                    const docId = (row.getAttribute('data-document-id') || '').toString();
+                    const docName = (row.getAttribute('data-document-name') || '').toLowerCase();
+                    const docDescription = (row.getAttribute('data-document-description') || '').toLowerCase();
+                    
+                    // Verificar si coincide con ID, nombre o descripción
+                    const matchesSearch = filter === '' || 
+                                          docId.includes(filter) || 
+                                          docName.includes(filter) || 
+                                          docDescription.includes(filter);
+                    
+                    // Mostrar/ocultar fila
+                    if (matchesSearch) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                    
+                    // También ocultar la fila de detalles si existe
+                    const detailsRow = document.getElementById(`details-${docId}`);
+                    if (detailsRow && !matchesSearch) {
+                        detailsRow.style.display = 'none';
+                        detailsRow.classList.remove('show');
+                    }
+                });
+            });
+        }
     });
 </script>
 @endpush

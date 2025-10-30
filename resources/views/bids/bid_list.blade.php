@@ -38,6 +38,9 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-md-12">
+            <div class="mb-3">
+                <input type="text" id="searchBids" class="form-control" placeholder="Buscar por ID, Postor o Propietario Oferta..." style="max-width: 400px;">
+            </div>
         </div>
     </div>
 
@@ -62,7 +65,13 @@
                     </thead>
                     <tbody>
                         @forelse($bids as $bid)
-                        <tr>
+                        @php
+                            $propietario = $bid->propietario();
+                        @endphp
+                        <tr class="bid-row" 
+                            data-bid-id="{{ $bid->id }}" 
+                            data-postor="{{ $bid->user ? $bid->user->name : 'N/A' }}" 
+                            data-propietario="{{ $propietario ? $propietario->name : 'N/A' }}">
                             <td>#{{ $bid->id }}</td>
                             <td>
                                 @if($bid->user)
@@ -74,9 +83,6 @@
                                 @endif
                             </td>
                             <td>
-                                @php
-                                    $propietario = $bid->propietario();
-                                @endphp
                                 @if($propietario)
                                     <a href="{{ route('users.show', $propietario) }}" class="user-link" title="">
                                         {{ $propietario->name }}
@@ -129,7 +135,6 @@
     .btn i:first-child {
         margin-right: 3px;
     }
-    }
     .badge {
         font-size: 0.85em;
         padding: 0.4em 0.8em;
@@ -158,19 +163,70 @@
         z-index: 1000;
         margin-bottom: 5px;
     }
+    
+    /* Estilos para el buscador */
+    #searchBids {
+        border: 1px solid #dee2e6;
+        transition: all 0.2s;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    #searchBids:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        outline: 0;
+    }
 </style>
 @endpush
 
 @push('scripts')
 <script>
-    $(document).ready(function() {
-        $('#bidsTable').DataTable({
-            responsive: true,
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json'
-            },
-            order: [[5, 'desc']]
+document.addEventListener('DOMContentLoaded', function() {
+    // Buscador personalizado
+    const searchInput = document.getElementById('searchBids');
+    
+    if (searchInput) {
+        console.log('Buscador de pujas inicializado correctamente');
+        
+        // Debug: verificar cuántas filas hay
+        const rows = document.querySelectorAll('tr.bid-row');
+        console.log('Total de filas encontradas:', rows.length);
+        
+        searchInput.addEventListener('input', function() {
+            const filter = this.value.toLowerCase().trim();
+            console.log('Buscando:', filter);
+            
+            let visibleCount = 0;
+            document.querySelectorAll('tr.bid-row').forEach(function(row) {
+                const bidId = (row.getAttribute('data-bid-id') || '').toString();
+                const postor = (row.getAttribute('data-postor') || '').toLowerCase();
+                const propietario = (row.getAttribute('data-propietario') || '').toLowerCase();
+                
+                // Debug: mostrar valores
+                if (filter !== '') {
+                    console.log('Fila - ID:', bidId, 'Postor:', postor, 'Propietario:', propietario);
+                }
+                
+                // Verificar si coincide con ID, postor o propietario
+                const matchesSearch = filter === '' || 
+                                      bidId.includes(filter) || 
+                                      postor.includes(filter) || 
+                                      propietario.includes(filter);
+                
+                // Mostrar/ocultar fila
+                if (matchesSearch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            console.log('Filas visibles:', visibleCount);
         });
-    });
+    } else {
+        console.error('No se encontró el input searchBids');
+    }
+});
 </script>
 @endpush

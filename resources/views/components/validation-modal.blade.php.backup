@@ -1,0 +1,540 @@
+@props([
+    'documentId' => null,
+    'status' => 'pendiente',
+])
+
+<!-- Modal personalizado sin backdrop de Bootstrap -->
+<div class="position-fixed top-0 start-0 w-100 h-100" id="validationModal" style="display: none; z-index: 9999;">
+    <!-- Fondo oscuro personalizado -->
+    <div class="position-fixed top-0 start-0 w-100 h-100 bg-dark opacity-50" id="modalBackdrop" style="z-index: 9998;"></div>
+    
+    <!-- Contenido del modal -->
+    <div class="position-absolute top-50 start-50 translate-middle" style="z-index: 10000; width: 90%; max-width: 800px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header bg-white border-bottom" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);">
+                <h5 class="modal-title fw-bold text-dark">Validar Documento</h5>
+                <button type="button" class="btn-close" onclick="hideModal()" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body text-center p-0" style="max-height: 70vh; overflow-y: auto;">
+                <div class="mb-4">
+                    <div class="bg-light p-3 rounded-3 border shadow-sm" style="background-color: #f8fafc !important;">
+                        <div class="bg-white p-4 rounded-3 shadow-sm mb-3 d-flex justify-content-center align-items-center" id="documentPreview" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important; min-height: 400px;">
+                            <!-- El contenido se cargará dinámicamente con JavaScript -->
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Cargando documento...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center gap-2 p-3">
+                    <form id="validateDocumentForm" method="POST" action="" class="w-100">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="status" value="aprobado">
+
+                        {{-- Área de rechazo: inicialmente oculta, se muestra al hacer clic en Rechazar --}}
+                        <div id="rejectArea" class="d-none w-100 mt-3">
+                            <label for="rejectReason" class="form-label">Motivo del rechazo (opcional pero recomendado)</label>
+                            <textarea name="comments" id="rejectReason" class="form-control" rows="3" placeholder="Escribe el motivo del rechazo..."></textarea>
+                            <div class="mt-2 d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="cancelReject()">Cancelar</button>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="confirmReject()">Confirmar Rechazo</button>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center gap-3 mt-3 pt-3 border-top">
+                            <a href="#" id="downloadDocument" class="btn btn-outline-primary shadow-sm" target="_blank" style="display: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
+                                <i class="fas fa-download me-2"></i> Descargar
+                            </a>
+                            <div class="d-flex gap-2">
+                                <button type="button" id="rejectBtn" class="btn btn-outline-secondary shadow-sm" onclick="rejectDocument()" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
+                                    <i class="fas fa-times me-2"></i> Rechazar
+                                </button>
+                                <button type="submit" class="btn btn-success shadow-sm" id="validateButton" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
+                                    <i class="fas fa-check me-2"></i> Aprobar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+// Cerrar el modal al hacer clic en el backdrop
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('validationModal');
+    const modalContent = document.querySelector('#validationModal .modal-content');
+    const backdrop = document.getElementById('validationModalBackdrop');
+    
+    // Solo cerrar si se hace clic directamente en el backdrop
+    if (backdrop && event.target === backdrop) {
+        // Ocultar el backdrop
+        backdrop.style.display = 'none';
+        backdrop.style.pointerEvents = 'none';
+        
+        // Ocultar el modal
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+                            if (!tr) {
+                                console.warn('No se encontró la fila correspondiente para data-user-document-id:', currentId, ' — no se actualizará la tabla en el DOM.');
+                            } else {
+                                // Detectar la estructura de la tabla para actualizar las celdas correctas
+                                const cells = tr.querySelectorAll('td');
+                                const numCols = cells.length;
+                                
+                                // Reconstruir la fila entera con los datos formateados devueltos por el servidor
+                                try {
+                                    const doc = data.document || {};
+
+                                    const statusLabel = doc.status_label || (doc.status ? (doc.status.charAt(0).toUpperCase() + doc.status.slice(1)) : 'Pendiente');
+                                    const statusClass = doc.status_class || ((doc.status === 'aprobado') ? 'bg-success' : ((doc.status === 'rechazado') ? 'bg-danger' : 'bg-warning'));
+                                    const createdAt = doc.created_at_formatted || doc.created_at || '';
+                                    const docId = doc.id || currentId;
+
+                                    let newRowHtml = '';
+
+                                    // Detectar si es la tabla de document_list (5 columnas) o user_list (4 columnas)
+                                    if (numCols === 5) {
+                                        // document_list.blade.php: Usuario, Email, Estado, Fecha, Acciones
+                                        const userName = doc.user_name || (doc.user && (doc.user.name || 'N/A')) || 'N/A';
+                                        const userEmail = doc.user_email || (doc.user && (doc.user.email || 'N/A')) || 'N/A';
+                                        
+                                        newRowHtml = `
+                                            <td>${escapeHtml(userName)}</td>
+                                            <td>${escapeHtml(userEmail)}</td>
+                                            <td><span class="badge ${escapeHtml(statusClass)}">${escapeHtml(statusLabel)}</span></td>
+                                            <td>${escapeHtml(createdAt)}</td>
+                                            <td class="text-center">
+                                                <button type="button" 
+                                                        class="btn btn-sm ${doc.status === 'aprobado' ? 'btn-outline-success' : 'btn-outline-primary'} open-validation-modal"
+                                                        data-document-id="${escapeHtml(docId)}"
+                                                        data-status="${escapeHtml(doc.status || '')}">
+                                                    <i class="far ${doc.status === 'aprobado' ? 'fa-check-circle' : 'fa-eye'} me-1"></i>
+                                                    ${doc.status === 'aprobado' ? 'Validado' : 'Ver'}
+                                                </button>
+                                            </td>
+                                        `;
+                                    } else if (numCols === 4) {
+                                        // user_list.blade.php: Tipo, Estado, Fecha, Acciones
+                                        const docType = doc.required_document_name || (doc.requiredDocument && doc.requiredDocument.name) || 'Documento';
+                                        
+                                        newRowHtml = `
+                                            <td>${escapeHtml(docType)}</td>
+                                            <td><span class="badge ${escapeHtml(statusClass)}">${escapeHtml(statusLabel)}</span></td>
+                                            <td>${escapeHtml(createdAt)}</td>
+                                            <td>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-outline-primary open-validation-modal" 
+                                                        data-document-id="${escapeHtml(docId)}"
+                                                        data-status="${escapeHtml(doc.status || '')}"
+                                                        data-bs-toggle="tooltip" 
+                                                        title="Ver documento">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </td>
+                                        `;
+                                    } else {
+                                        // Estructura desconocida, actualizar solo estado y fecha por posición relativa
+                                        console.warn('Estructura de tabla no reconocida (columnas: ' + numCols + '), actualizando por índice aproximado');
+                                        const statusIdx = numCols === 3 ? 1 : (numCols > 3 ? 2 : 1);
+                                        const dateIdx = statusIdx + 1;
+                                        
+                                        if (cells[statusIdx]) {
+                                            cells[statusIdx].innerHTML = '<span class="badge ' + escapeHtml(statusClass) + '">' + escapeHtml(statusLabel) + '</span>';
+                                        }
+                                        if (cells[dateIdx] && createdAt) {
+                                            cells[dateIdx].textContent = createdAt;
+                                        }
+                                        
+                                        // Actualizar botón si existe
+                                        const actionBtn = tr.querySelector('.open-validation-modal');
+                                        if (actionBtn) {
+                                            actionBtn.setAttribute('data-status', doc.status || '');
+                                        }
+                                    }
+
+                                    if (newRowHtml) {
+                                        // Reemplazar el contenido de la fila
+                                        tr.innerHTML = newRowHtml;
+                                    }
+
+                                    // Pequeño highlight
+                                    tr.style.transition = 'background-color 0.3s ease';
+                                    tr.style.backgroundColor = 'rgba(16, 185, 129, 0.08)';
+                                    setTimeout(() => { tr.style.backgroundColor = ''; }, 1200);
+                                } catch (innerErr) {
+                                    console.warn('Error reconstruyendo la fila con datos devueltos:', innerErr);
+                                }
+                            }
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 text-muted">Cargando documento...</p>
+        </div>
+    `;
+    
+    // Hacer petición para obtener los datos del documento
+    fetch('/documentos-usuarios/' + documentId, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(async response => {
+        // Si no es OK, intentar leer el cuerpo para mostrar detalles
+        if (!response.ok) {
+            let body = '';
+            try { body = await response.text(); } catch (e) { body = ''; }
+            throw new Error('Error al cargar el documento. Estado: ' + response.status + ' ' + response.statusText + ' - ' + body);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // El documento viene del servidor con su información
+        const document = data.document || data;
+        // Usar el atributo document_url que ya viene procesado del modelo
+        let documentUrl = document.document_url || '';
+
+        if (!documentUrl) {
+            throw new Error('No se encontró la ruta del documento. Asegúrate de que el archivo exista y que la configuración MAIN_APP_URL sea correcta.');
+        }
+
+        // Actualizar el enlace de descarga
+        downloadLink.href = documentUrl;
+        downloadLink.style.display = 'inline-block';
+        downloadLink.target = '_blank';
+
+        // Determinar el tipo de archivo usando la URL final (más confiable que file_path)
+        const urlParts = documentUrl.split('.');
+        const fileExtension = urlParts.length ? urlParts[urlParts.length - 1].split(/[?#]/)[0].toLowerCase() : '';
+
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+            // Es una imagen - centrada
+            previewContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center w-100"><img src="' + documentUrl + '" alt="Documento" class="img-fluid rounded shadow-sm" style="max-width: 90%; height: auto; max-height: 500px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.onerror=null; this.parentElement.innerHTML=\'<div class=\\\'alert alert-danger text-center\\\'>Error al cargar la imagen. Asegúrate de que el servidor principal (pickandtruckfinal) esté ejecutándose y que MAIN_APP_URL esté configurado correctamente.</div>\';"></div>';
+        } else if (fileExtension === 'pdf') {
+            // Es un PDF - ocupa todo el ancho
+            previewContainer.innerHTML = '<div class="w-100"><iframe src="' + documentUrl + '" style="width: 100%; height: 500px; border: none; border-radius: 8px; display: block;"></iframe></div>';
+        } else {
+            // Otro tipo de archivo - centrado
+            previewContainer.innerHTML = '<div class="alert alert-info text-center mx-auto" style="max-width: 500px;"><i class="fas fa-file me-2"></i> No se puede mostrar una vista previa de este tipo de archivo. <br><a href="' + documentUrl + '" target="_blank" class="btn btn-sm btn-primary mt-2"><i class="fas fa-download me-1"></i> Descargar archivo</a></div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error cargando documento:', error);
+        const msg = error && error.message ? error.message : 'Error al cargar el documento.';
+        previewContainer.innerHTML = '<div class="alert alert-danger text-center mx-auto" style="max-width: 700px;"><i class="fas fa-exclamation-circle me-2"></i> ' + escapeHtml(msg) + '<br><br><strong>Nota:</strong> Los documentos están almacenados en el servidor principal de pickandtruckfinal. Asegúrate de que ese servidor esté en funcionamiento y que la variable de entorno <code>MAIN_APP_URL</code> apunte correctamente (ej. http://localhost:8000).</div>';
+        downloadLink.style.display = 'none';
+    });
+}
+
+// Mostrar la UI para ingresar motivo de rechazo
+function rejectDocument() {
+    const rejectArea = document.getElementById('rejectArea');
+    const rejectBtn = document.getElementById('rejectBtn');
+    const validateButton = document.getElementById('validateButton');
+
+    if (rejectArea) {
+        rejectArea.classList.remove('d-none');
+        // Enfocar textarea
+        const ta = document.getElementById('rejectReason');
+        if (ta) ta.focus();
+    }
+
+    // Opcional: deshabilitar temporalmente el botón de aprobar para evitar conflictos
+    if (validateButton) validateButton.disabled = true;
+    if (rejectBtn) rejectBtn.disabled = true;
+}
+
+function cancelReject() {
+    const rejectArea = document.getElementById('rejectArea');
+    const validateButton = document.getElementById('validateButton');
+    const rejectBtn = document.getElementById('rejectBtn');
+
+    if (rejectArea) {
+        rejectArea.classList.add('d-none');
+        const ta = document.getElementById('rejectReason');
+        if (ta) ta.value = '';
+    }
+
+    if (validateButton) validateButton.disabled = false;
+    if (rejectBtn) rejectBtn.disabled = false;
+}
+
+// Confirma y envía el rechazo con motivo
+function confirmReject() {
+    const form = document.getElementById('validateDocumentForm');
+    if (!form) return;
+
+    // Validación local: revisar que el motivo tenga al menos 5 caracteres
+    const ta = document.getElementById('rejectReason');
+    const existingAlert = document.getElementById('rejectError');
+    if (existingAlert) existingAlert.remove();
+
+    const value = ta ? (ta.value || '').trim() : '';
+    if (value.length < 5) {
+        // Insertar mensaje de error visible
+        const container = ta ? ta.parentElement : form;
+        const err = document.createElement('div');
+        err.id = 'rejectError';
+        err.className = 'alert alert-danger mt-2';
+        err.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i> El motivo debe tener al menos 5 caracteres para rechazar el documento.';
+        if (container) container.insertBefore(err, ta.nextSibling);
+        if (ta) ta.focus();
+        return;
+    }
+
+    // Establecer el estado a 'rechazado'
+    const statusInput = form.querySelector('input[name="status"]');
+    if (statusInput) statusInput.value = 'rechazado';
+
+    // Enviar el formulario (el submit está manejado por el listener ya presente)
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const validationModal = document.getElementById('validationModal');
+    const closeButton = document.getElementById('closeModal');
+    
+    if (validationModal) {
+        // Manejar la apertura del modal
+        document.addEventListener('click', function(e) {
+            const button = e.target.closest('.open-validation-modal');
+            if (button) {
+                e.preventDefault();
+                
+                const documentId = button.getAttribute('data-document-id');
+                const status = button.getAttribute('data-status');
+                
+                // Actualizar el formulario con los datos del documento
+                const form = validationModal.querySelector('form');
+                form.action = `/documentos-usuarios/${documentId}`;
+                        // Guardar el id actual en el modal (para actualizar la fila sin recargar)
+                        validationModal.dataset.currentDocumentId = documentId;
+                
+                // Actualizar el estado del botón
+                const validateButton = validationModal.querySelector('#validateButton');
+                if (status === 'aprobado') {
+                    validateButton.disabled = true;
+                    validateButton.innerHTML = '<i class="fas fa-check-circle me-1"></i> Documento Aprobado';
+                    validateButton.classList.remove('btn-success');
+                    validateButton.classList.add('btn-outline-success');
+                } else {
+                    validateButton.disabled = false;
+                    validateButton.innerHTML = '<i class="fas fa-check me-1"></i> Validar Documento';
+                    validateButton.classList.remove('btn-outline-success');
+                    validateButton.classList.add('btn-success');
+                }
+                
+                // Cargar el documento
+                loadDocumentPreview(documentId);
+                
+                // Mostrar el modal
+                showModal();
+            }
+        });
+        
+        // Cerrar al hacer clic fuera del modal (en el backdrop)
+        document.getElementById('modalBackdrop').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideModal();
+            }
+        });
+        
+        // Cerrar con la tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideModal();
+            }
+        });
+        
+        // Manejar el envío del formulario
+        const validateForm = document.getElementById('validateDocumentForm');
+        
+        if (validateForm) {
+            validateForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const form = e.target;
+                const formData = new FormData(form);
+                const url = form.getAttribute('action');
+                
+                // Mostrar indicador de carga
+                const submitButton = form.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Procesando...';
+                
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-HTTP-Method-Override': 'PUT'
+                    },
+                    body: formData
+                })
+                .then(async response => {
+                    const data = await response.json().catch(() => ({}));
+                    
+                    if (!response.ok) {
+                        const error = new Error(data.message || 'Error en la respuesta del servidor');
+                        error.response = data;
+                        throw error;
+                    }
+                    
+                    return data;
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Remover alertas previas en el modal
+                        const prevAlerts = validationModal.querySelectorAll('.modal-centered-alert, .alert');
+                        prevAlerts.forEach(a => a.remove());
+
+                        // Crear overlay centrado y elegante para el mensaje de éxito
+                        const overlay = document.createElement('div');
+                        overlay.className = 'modal-centered-alert';
+                        overlay.style.cssText = 'position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:10001; pointer-events:none; padding:1rem;';
+
+                        const box = document.createElement('div');
+                        box.className = 'alert alert-success d-flex align-items-center';
+                        box.style.cssText = 'max-width:640px; width:100%; border-radius:12px; box-shadow:0 8px 24px rgba(16,24,40,0.12); pointer-events:auto;';
+                        box.innerHTML = '<div style="font-size:1.35rem; margin-right:0.75rem; color: #0f5132;"><i class="fas fa-check-circle"></i></div><div><strong style="display:block; font-size:1rem;">' + (data.message || 'Documento actualizado exitosamente.') + '</strong><small class="d-block text-muted">Los cambios se guardaron correctamente.</small></div>';
+
+                        overlay.appendChild(box);
+
+                        // Insertar overlay dentro del modal (sobre el contenido)
+                        const modalContent = validationModal.querySelector('.modal-content');
+                        if (modalContent) modalContent.appendChild(overlay);
+
+                        // Actualizar estado del botón de validar si aplica
+                        const validateButton = document.getElementById('validateButton');
+                        if (validateButton) {
+                            validateButton.disabled = true;
+                            validateButton.innerHTML = '<i class="fas fa-check-circle me-2"></i> Documento Aprobado';
+                            validateButton.classList.remove('btn-success');
+                            validateButton.classList.add('btn-outline-success');
+                        }
+
+                        // Actualizar la fila correspondiente en la lista sin recargar
+                        try {
+                            // Usar el id que guardamos cuando abrimos el modal para seleccionar la fila exacta
+                            const currentId = (validationModal && validationModal.dataset && validationModal.dataset.currentDocumentId) ? validationModal.dataset.currentDocumentId : (data.document.id || data.document);
+
+                            // Intentar selección directa
+                            let tr = document.querySelector('tr[data-user-document-id="' + currentId + '"]');
+
+                            // Fallback: comparar con igualdad la cadena/número por si hay diferencias de tipo
+                            if (!tr) {
+                                const rows = Array.from(document.querySelectorAll('tr[data-user-document-id]'));
+                                tr = rows.find(r => String(r.getAttribute('data-user-document-id')) === String(currentId));
+                            }
+
+                            // Fallback adicional: buscar el botón que abrió el modal y subir al tr
+                            if (!tr) {
+                                const btn = document.querySelector('.open-validation-modal[data-document-id="' + currentId + '"]');
+                                if (btn) tr = btn.closest('tr');
+                            }
+
+                            if (!tr) {
+                                console.warn('No se encontró la fila correspondiente para data-user-document-id:', currentId, ' — no se actualizará la tabla en el DOM.');
+                            } else {
+                                // Seleccionar celdas por posicion para evitar confusiones con nodos text
+                                const statusCell = tr.querySelector('td:nth-child(3)');
+                                const dateCell = tr.querySelector('td:nth-child(4)');
+
+                                // Actualizar estado
+                                if (statusCell) {
+                                    const newStatus = (data && data.document && data.document.status) ? data.document.status : (data.status || 'pendiente');
+                                    const statusClass = (newStatus === 'aprobado') ? 'bg-success' : (newStatus === 'rechazado') ? 'bg-danger' : 'bg-warning';
+                                    statusCell.innerHTML = '<span class="badge ' + statusClass + '">' + (newStatus.charAt(0).toUpperCase() + newStatus.slice(1)) + '</span>';
+                                }
+
+                                // Actualizar la fecha si viene actualizada (si no, no tocarla)
+                                if (dateCell && data && data.document && data.document.created_at) {
+                                    // Intentar mantener el formato simple devuelto por el servidor
+                                    dateCell.textContent = data.document.created_at_formatted || data.document.created_at || dateCell.textContent;
+                                }
+
+                                // Actualizar texto y clase del botón de acción dentro de la misma fila
+                                const actionBtn = tr.querySelector('.open-validation-modal');
+                                if (actionBtn) {
+                                    if (data.document && data.document.status === 'aprobado') {
+                                        actionBtn.classList.remove('btn-outline-primary');
+                                        actionBtn.classList.add('btn-outline-success');
+                                        actionBtn.innerHTML = '<i class="far fa-check-circle me-1"></i> Validado';
+                                    } else {
+                                        actionBtn.classList.remove('btn-outline-success');
+                                        actionBtn.classList.add('btn-outline-primary');
+                                        actionBtn.innerHTML = '<i class="far fa-eye me-1"></i> Ver';
+                                    }
+
+                                    // resaltar la fila temporalmente
+                                    tr.style.transition = 'background-color 0.3s ease';
+                                    tr.style.backgroundColor = 'rgba(16, 185, 129, 0.08)';
+                                    setTimeout(() => { tr.style.backgroundColor = ''; }, 1200);
+                                }
+                            }
+                        } catch (err) {
+                            console.warn('No se pudo actualizar la fila en DOM:', err);
+                        }
+
+                        // Cerrar el modal después de 1.2 segundos
+                        setTimeout(() => {
+                            hideModal();
+                        }, 1200);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Restaurar el botón
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
+                    
+                    // Mostrar mensaje de error con detalles
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-danger mt-3 mb-0';
+                    
+                    let errorMessage = 'Error al procesar la solicitud. Por favor, intente nuevamente.';
+                    
+                    if (error.response && error.response.message) {
+                        errorMessage = error.response.message;
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+                    
+                    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i> ${errorMessage}`;
+                    
+                    // Eliminar mensajes de error anteriores
+                    const existingAlerts = form.parentNode.querySelectorAll('.alert');
+                    existingAlerts.forEach(alert => alert.remove());
+                    
+                    form.parentNode.insertBefore(errorDiv, form.nextSibling);
+                    
+                    // Desplazarse al mensaje de error
+                    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+            });
+        }
+    }
+});
+
+// Helper para escapar texto antes de inyectarlo en el DOM (previene XSS accidental)
+function escapeHtml(unsafe) {
+    if (unsafe === null || unsafe === undefined) return '';
+    return String(unsafe)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+</script>
+@endpush

@@ -107,6 +107,50 @@ class UserDocumentController extends Controller
     }
 
     /**
+     * Muestra una vista previa del documento (proxy) para evitar descargas forzadas.
+     */
+    public function preview(UserDocument $document)
+    {
+        $url = $document->document_url;
+        
+        if (!$url) {
+            abort(404, 'URL no encontrada');
+        }
+
+        try {
+            // Obtener el contenido del archivo remoto
+            // Usamos context stream para ignorar errores SSL si es necesario o timeouts
+            $arrContextOptions = array(
+                "ssl" => array(
+                    "verify_peer" => false, 
+                    "verify_peer_name" => false,
+                ),
+            );
+            $content = file_get_contents($url, false, stream_context_create($arrContextOptions));
+            
+            if ($content === false) {
+                 abort(404, 'No se pudo leer el documento remoto.');
+            }
+    
+            $extension = pathinfo($document->file_path, PATHINFO_EXTENSION);
+            $mime = match(strtolower($extension)) {
+                'pdf' => 'application/pdf',
+                'png' => 'image/png',
+                'jpg', 'jpeg' => 'image/jpeg',
+                'webp' => 'image/webp',
+                default => 'application/octet-stream'
+            };
+    
+            return response($content)
+                ->header('Content-Type', $mime)
+                ->header('Content-Disposition', 'inline; filename="' . basename($document->file_path) . '"');
+    
+        } catch (\Exception $e) {
+            abort(404, 'Error al procesar el documento: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Elimina un documento.
      */
     public function destroy(UserDocument $document): RedirectResponse

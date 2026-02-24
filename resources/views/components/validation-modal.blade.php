@@ -46,10 +46,15 @@
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center gap-3 mt-3 pt-3 border-top">
-                            <a href="#" id="downloadDocument" class="btn btn-outline-primary shadow-sm" target="_blank" style="display: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
-                                <i class="fas fa-download me-2"></i> Descargar
-                            </a>
-                            <div class="d-flex gap-2">
+                            <div class="d-none gap-2" id="documentActions">
+                                <a href="#" id="viewDocument" class="btn btn-outline-info shadow-sm" target="_blank" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
+                                    <i class="fas fa-eye me-2"></i> Ver
+                                </a>
+                                <a href="#" id="downloadDocument" class="btn btn-outline-primary shadow-sm" download style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
+                                    <i class="fas fa-download me-2"></i> Descargar
+                                </a>
+                            </div>
+                            <div class="d-flex gap-2 ms-auto">
                                 <button type="button" id="rejectBtn" class="btn btn-outline-secondary shadow-sm" onclick="rejectDocument()" style="box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important;">
                                     <i class="fas fa-times me-2"></i> Rechazar
                                 </button>
@@ -121,6 +126,8 @@ function hideModal() {
 function loadDocumentPreview(documentId) {
     const previewContainer = document.getElementById('documentPreview');
     const downloadLink = document.getElementById('downloadDocument');
+    const viewLink = document.getElementById('viewDocument');
+    const documentActions = document.getElementById('documentActions');
     
     previewContainer.innerHTML = `
         <div class="text-center py-4">
@@ -154,26 +161,39 @@ function loadDocumentPreview(documentId) {
             throw new Error('No se encontró la ruta del documento. Asegúrate de que el archivo exista y que la configuración MAIN_APP_URL sea correcta.');
         }
 
+        // Configurar los botones de ver y descargar
+        viewLink.href = documentUrl;
         downloadLink.href = documentUrl;
-        downloadLink.style.display = 'inline-block';
-        downloadLink.target = '_blank';
+        documentActions.classList.remove('d-none');
+        documentActions.classList.add('d-flex');
+        
+        // Extraer el nombre del archivo de la URL para el atributo download
+        const fileName = documentUrl.split('/').pop().split('?')[0];
+        downloadLink.setAttribute('download', fileName);
 
         const urlParts = documentUrl.split('.');
         const fileExtension = urlParts.length ? urlParts[urlParts.length - 1].split(/[?#]/)[0].toLowerCase() : '';
 
         if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
-            previewContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center w-100"><img src="' + documentUrl + '" alt="Documento" class="img-fluid rounded shadow-sm" style="max-width: 90%; height: auto; max-height: 500px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.onerror=null; this.parentElement.innerHTML=\'<div class=\\\'alert alert-danger text-center\\\'>Error al cargar la imagen. Asegúrate de que el servidor principal esté ejecutándose y MAIN_APP_URL configurado.</div>\';"></div>';
+            previewContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center w-100"><img src="' + documentUrl + '" alt="Documento" class="img-fluid rounded shadow-sm" style="max-width: 90%; height: auto; max-height: 500px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.onerror=null; this.parentElement.innerHTML=\'<div class=\\\'alert alert-danger text-center\\\'>Error al cargar la imagen. Verifique:<br>1. Que el servidor principal (pickandtruckfinal) esté ejecutándose<br>2. Que MAIN_APP_URL esté configurado en el archivo .env<br>3. Que el archivo exista en la ruta especificada</div>\';"></div>';
         } else if (fileExtension === 'pdf') {
-            previewContainer.innerHTML = '<div class="w-100"><iframe src="' + documentUrl + '" style="width: 100%; height: 500px; border: none; border-radius: 8px; display: block;"></iframe></div>';
+            // Usar la ruta proxy del manager para forzar 'inline' y evitar descarga
+            const previewUrl = '/documentos-usuarios/' + (document.id || validationModal.dataset.currentDocumentId) + '/preview';
+            
+            previewContainer.innerHTML = '<div class="w-100" style="height: 500px;"><object data="' + previewUrl + '" type="application/pdf" width="100%" height="100%" class="rounded shadow-sm border"><div class="d-flex align-items-center justify-content-center h-100 bg-light p-4 text-center rounded"><div class="alert alert-warning mb-0"><i class="fas fa-exclamation-triangle me-2"></i>El navegador no puede mostrar este PDF directamente.<br><a href="' + previewUrl + '" target="_blank" class="btn btn-primary btn-sm mt-2">Abrir en nueva pestaña</a></div></div></object></div>';
+            
+            // Actualizar el botón "Ver" para que también use el proxy
+            viewLink.href = previewUrl;
         } else {
-            previewContainer.innerHTML = '<div class="alert alert-info text-center mx-auto" style="max-width: 500px;"><i class="fas fa-file me-2"></i> No se puede mostrar una vista previa. <br><a href="' + documentUrl + '" target="_blank" class="btn btn-sm btn-primary mt-2"><i class="fas fa-download me-1"></i> Descargar archivo</a></div>';
+            previewContainer.innerHTML = '<div class="alert alert-info text-center mx-auto" style="max-width: 500px;"><i class="fas fa-file me-2"></i> No se puede mostrar una vista previa de este tipo de archivo.<br>Use los botones \"Ver\" o \"Descargar\" para acceder al documento.</div>';
         }
     })
     .catch(error => {
         console.error('Error cargando documento:', error);
         const msg = error && error.message ? error.message : 'Error al cargar el documento.';
-        previewContainer.innerHTML = '<div class="alert alert-danger text-center mx-auto" style="max-width: 700px;"><i class="fas fa-exclamation-circle me-2"></i> ' + escapeHtml(msg) + '<br><br><strong>Nota:</strong> Asegúrate de que el servidor principal esté en funcionamiento y MAIN_APP_URL configurado (ej. http://localhost:8000).</div>';
-        downloadLink.style.display = 'none';
+        previewContainer.innerHTML = '<div class="alert alert-danger text-center mx-auto" style="max-width: 700px;"><i class="fas fa-exclamation-circle me-2"></i> ' + escapeHtml(msg) + '<br><br><strong>Solución:</strong><br>1. Asegúrate de que el servidor principal (pickandtruckfinal) esté en ejecución<br>2. Verifica que MAIN_APP_URL esté configurado en el archivo .env (ej. MAIN_APP_URL=http://localhost:8000)<br>3. Confirma que el archivo exista en la carpeta public/documents del servidor principal</div>';
+        documentActions.classList.remove('d-flex');
+        documentActions.classList.add('d-none');
     });
 }
 
@@ -468,6 +488,70 @@ document.addEventListener('DOMContentLoaded', function() {
                                 tr.style.transition = 'background-color 0.3s ease';
                                 tr.style.backgroundColor = 'rgba(16, 185, 129, 0.08)';
                                 setTimeout(() => { tr.style.backgroundColor = ''; }, 1200);
+
+                                // LÓGICA MEJORADA: Verificar estado de documentos
+                                try {
+                                    // 1. Encontrar la tabla de documentos
+                                    const documentsTable = tr.closest('table');
+                                    
+                                    if (documentsTable) {
+                                        // 2. Verificar TODOS los botones 'action' en la tabla
+                                        // Usamos data-status que es más confiable que las clases CSS
+                                        const actionButtons = documentsTable.querySelectorAll('.open-validation-modal');
+                                        let allApproved = true;
+                                        
+                                        if (actionButtons.length > 0) {
+                                            actionButtons.forEach(btn => {
+                                                const status = btn.getAttribute('data-status');
+                                                // Si alguno no está aprobado, marcamos bandera falsa
+                                                if (status !== 'aprobado') {
+                                                    allApproved = false;
+                                                }
+                                            });
+                                        } else {
+                                            // Fallback por si no encuentra botones (ej: estructura diferente)
+                                            allApproved = false;
+                                        }
+
+                                        // 3. Buscar el botón "Verificar Usuario"
+                                        // Buscamos en el contenedor más cercano que agrupe tabla y botón
+                                        let container = documentsTable.closest('.card-body');
+                                        if (!container) container = documentsTable.closest('.document-list'); // Intento alternativo
+                                        
+                                        if (container) {
+                                            const verifyButton = container.querySelector('.verify-user');
+                                            
+                                            if (verifyButton) {
+                                                // 4. Actualizar estado del botón
+                                                if (allApproved) {
+                                                    verifyButton.disabled = false;
+                                                    verifyButton.classList.remove('btn-secondary');
+                                                    verifyButton.classList.add('btn-success');
+                                                    verifyButton.innerHTML = '<i class="fas fa-user-check me-1"></i> Verificar Usuario'; // Restaurar icono
+                                                    verifyButton.setAttribute('title', 'Verificar este usuario');
+                                                    verifyButton.removeAttribute('disabled'); // Asegurar remoción
+                                                } else {
+                                                    verifyButton.disabled = true;
+                                                    verifyButton.classList.remove('btn-success');
+                                                    verifyButton.classList.add('btn-secondary');
+                                                    verifyButton.setAttribute('title', 'Todos los documentos deben estar aprobados');
+                                                    verifyButton.setAttribute('disabled', 'disabled');
+                                                }
+                                                
+                                                // Actualizar tooltip de Bootstrap si existe
+                                                if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                                                    try {
+                                                        const tooltip = bootstrap.Tooltip.getInstance(verifyButton) || new bootstrap.Tooltip(verifyButton);
+                                                        tooltip.setAttribute('data-bs-original-title', allApproved ? 'Verificar este usuario' : 'Todos los documentos deben estar aprobados');
+                                                    } catch(e) {}
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (err) {
+                                    console.error('Error al actualizar botón de verificación:', err);
+                                }
+
                             }
                         } catch (err) {
                             console.warn('No se pudo actualizar la fila:', err);

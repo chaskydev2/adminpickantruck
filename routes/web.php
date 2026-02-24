@@ -48,6 +48,14 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Rutas protegidas
 Route::middleware(['auth'])->group(function () {
+    // API para verificar autenticación (útil para debugging)
+    Route::get('/api/auth/check', function () {
+        return response()->json([
+            'authenticated' => true,
+            'user' => auth()->user()->only(['id', 'name', 'email', 'role'])
+        ]);
+    })->name('api.auth.check');
+    
     // Perfil de administrador
     Route::prefix('perfil')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'show'])->name('show');
@@ -138,6 +146,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [UserDocumentController::class, 'index'])->name('user-documents.index');
         Route::get('/{document}/editar', [UserDocumentController::class, 'edit'])->name('user-documents.edit');
         Route::put('/{document}', [UserDocumentController::class, 'update'])->name('user-documents.update');
+        Route::get('/{document}/preview', [UserDocumentController::class, 'preview'])->name('user-documents.preview');
         Route::get('/{document}', [UserDocumentController::class, 'show'])->name('user-documents.show');
         Route::delete('/{document}', [UserDocumentController::class, 'destroy'])->name('user-documents.destroy');
     });

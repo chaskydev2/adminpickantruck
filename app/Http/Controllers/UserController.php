@@ -67,7 +67,17 @@ class UserController extends Controller
         try {
             $nuevoEstado = !$user->verified;
             $user->verified = $nuevoEstado;
-            $user->save(); // No es necesario user->refresh() si solo necesitas el estado para la respuesta
+            $user->save(); 
+
+            // Verificar si el usuario acaba de ser verificado para enviar el correo
+            if ($nuevoEstado) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\UserVerified($user));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Error al enviar correo de verificación al usuario {$user->id}: " . $e->getMessage());
+                    // No detenemos la ejecución si falla el correo, pero lo registramos
+                }
+            }
 
             $message = $nuevoEstado ? 'Usuario verificado correctamente' : 'Usuario desverificado correctamente';
             

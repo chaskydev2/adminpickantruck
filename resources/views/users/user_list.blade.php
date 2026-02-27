@@ -116,6 +116,14 @@
                                         <i class="fas {{ $user->estado === 'Bloqueado' ? 'fa-unlock' : 'fa-lock' }}"></i>
                                     </button>
                                 </form>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-danger delete-user" 
+                                        data-user-id="{{ $user->id }}"
+                                        data-user-name="{{ $user->name }}"
+                                        data-bs-toggle="tooltip" 
+                                        title="Eliminar usuario">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -388,7 +396,90 @@ document.addEventListener('DOMContentLoaded', function() {
             updateUserVerification(userId, false, unverifyButton);
             return;
         }
+
+        // Verificar si se hizo clic en el botón de eliminar
+        const deleteButton = event.target.closest('.delete-user');
+        if (deleteButton) {
+            event.preventDefault();
+            const userId = deleteButton.getAttribute('data-user-id');
+            const userName = deleteButton.getAttribute('data-user-name');
+            deleteUser(userId, userName);
+            return;
+        }
     });
+
+    // Función para eliminar usuario
+    function deleteUser(userId, userName) {
+        if (!confirm(`¿Estás seguro de eliminar al usuario "${userName}"?\n\nEsta acción eliminará TODOS los datos del usuario:\n- Perfil de usuario\n- Documentos subidos\n- Ofertas de carga\n- Ofertas de ruta\n- Mensajes en chats\n- Cualquier otro dato relacionado\n\nEsta acción NO se puede deshacer.`)) {
+            return;
+        }
+
+        // Confirmación adicional para acciones críticas
+        const confirmText = prompt(`Para confirmar, escribe "ELIMINAR" (en mayúsculas):`);
+        if (confirmText !== 'ELIMINAR') {
+            alert('Operación cancelada.');
+            return;
+        }
+
+        // Mostrar indicador de carga
+        const deleteButtons = document.querySelectorAll(`.delete-user[data-user-id="${userId}"]`);
+        deleteButtons.forEach(button => {
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+        });
+
+        fetch(`/usuarios/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Eliminar la fila de la tabla con animación
+                const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+                const detailRow = document.getElementById(`detail-row-${userId}`);
+                
+                if (userRow) {
+                    userRow.style.transition = 'opacity 0.3s';
+                    userRow.style.opacity = '0';
+                    setTimeout(() => {
+                        userRow.remove();
+                        if (detailRow) detailRow.remove();
+                        
+                        // Mostrar mensaje de éxito
+                        const successDiv = document.createElement('div');
+                        successDiv.className = 'alert alert-success alert-dismissible fade show';
+                        successDiv.innerHTML = `
+                            <strong>¡Éxito!</strong> El usuario "${userName}" ha sido eliminado correctamente.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        document.querySelector('.card').insertAdjacentElement('beforebegin', successDiv);
+                        
+                        // Auto-cerrar después de 5 segundos
+                        setTimeout(() => {
+                            successDiv.remove();
+                        }, 5000);
+                    }, 300);
+                }
+            } else {
+                throw new Error(data.message || 'Error al eliminar el usuario');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar el usuario: ' + error.message);
+            
+            // Restaurar botones
+            deleteButtons.forEach(button => {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-trash"></i>';
+            });
+        });
+    }
 });
 </script>
 @endpush

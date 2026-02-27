@@ -15,6 +15,45 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Cuando se elimina un usuario, eliminar todos sus datos relacionados
+        static::deleting(function ($user) {
+            // Eliminar documentos
+            $user->documents()->delete();
+            
+            // Eliminar ofertas de carga
+            $user->ofertasCarga()->delete();
+            
+            // Eliminar ofertas de ruta
+            $user->ofertasRuta()->delete();
+            
+            // Eliminar empresa asociada
+            if ($user->empresa) {
+                $user->empresa->delete();
+            }
+            
+            // Eliminar bids del usuario (el cascade eliminará los chats automáticamente)
+            \App\Models\Bid::where('user_id', $user->id)->delete();
+            
+            // Eliminar bids en ofertas del usuario (para limpiar los chats de sus ofertas)
+            \App\Models\Bid::whereHasMorph('bideable', 
+                [\App\Models\OfertaRuta::class, \App\Models\OfertaCarga::class],
+                function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                }
+            )->delete();
+            
+            // Los mensajes se eliminan automáticamente por cascade de user_id
+            // Los chats se eliminan automáticamente por cascade de bid_id
+        });
+    }
+
+    /**
      * Get the ofertas de carga for the user.
      */
     /**

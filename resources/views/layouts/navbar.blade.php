@@ -123,5 +123,10 @@
                 <i class="fas fa-truck me-2"></i> Tipo de Camión
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('memberships*') ? 'active' : '' }}" href="{{ route('memberships.index') }}">
+                <i class="fas fa-id-card me-2"></i> Membresías
+            </a>
+        </li>
     </ul>
 </div>

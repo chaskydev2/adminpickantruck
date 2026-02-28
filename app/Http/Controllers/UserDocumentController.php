@@ -151,6 +151,48 @@ class UserDocumentController extends Controller
     }
 
     /**
+     * Descarga el documento (proxy con Content-Disposition: attachment).
+     */
+    public function download(UserDocument $document)
+    {
+        $url = $document->document_url;
+
+        if (!$url) {
+            abort(404, 'URL no encontrada');
+        }
+
+        try {
+            $context = stream_context_create([
+                'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
+            ]);
+            $content = file_get_contents($url, false, $context);
+
+            if ($content === false) {
+                abort(404, 'No se pudo leer el documento remoto.');
+            }
+
+            $extension = strtolower(pathinfo($document->file_path, PATHINFO_EXTENSION));
+            $mime = match($extension) {
+                'pdf'  => 'application/pdf',
+                'png'  => 'image/png',
+                'jpg', 'jpeg' => 'image/jpeg',
+                'webp' => 'image/webp',
+                default => 'application/octet-stream'
+            };
+
+            $filename = basename($document->file_path);
+
+            return response($content)
+                ->header('Content-Type', $mime)
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                ->header('Content-Length', strlen($content));
+
+        } catch (\Exception $e) {
+            abort(404, 'Error al descargar el documento: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Elimina un documento.
      */
     public function destroy(UserDocument $document): RedirectResponse

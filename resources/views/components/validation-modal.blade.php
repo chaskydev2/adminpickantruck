@@ -162,15 +162,12 @@ function loadDocumentPreview(documentId) {
         }
 
         // Configurar los botones de ver y descargar
-        viewLink.href = documentUrl;
-        downloadLink.href = documentUrl;
+        const docId = document.id || documentId;
+        viewLink.href = '/documentos-usuarios/' + docId + '/preview';
+        downloadLink.href = '/documentos-usuarios/' + docId + '/download';
+        downloadLink.removeAttribute('download'); // el servidor ya fuerza la descarga
         documentActions.classList.remove('d-none');
         documentActions.classList.add('d-flex');
-        
-        // Extraer el nombre del archivo de la URL para el atributo download
-        const fileName = documentUrl.split('/').pop().split('?')[0];
-        downloadLink.setAttribute('download', fileName);
-
         const urlParts = documentUrl.split('.');
         const fileExtension = urlParts.length ? urlParts[urlParts.length - 1].split(/[?#]/)[0].toLowerCase() : '';
 

@@ -49,13 +49,19 @@
                         @endif
                     </div>
 
-                    <div class="mt-4">
-                        <button class="btn btn-outline-primary btn-sm me-2">
+                    <div class="mt-4 d-flex gap-2 justify-content-center flex-wrap">
+                        <a href="mailto:{{ $user->email }}" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-envelope me-1"></i> Mensaje
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-phone me-1"></i> Llamar
-                        </button>
+                        </a>
+                        @if($user->phone)
+                            <a href="tel:{{ $user->phone }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-phone me-1"></i> {{ $user->phone }}
+                            </a>
+                        @else
+                            <button class="btn btn-outline-secondary btn-sm" disabled>
+                                <i class="fas fa-phone me-1"></i> Sin teléfono
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -66,8 +72,8 @@
                     <div class="mb-3">
                         <p class="mb-1 text-muted">Teléfono</p>
                         <p class="mb-0">
-                            @if(isset($user->empresa) && $user->empresa->telefono)
-                                {{ $user->empresa->telefono }}
+                            @if($user->phone)
+                                <a href="tel:{{ $user->phone }}">{{ $user->phone }}</a>
                             @else
                                 No especificado
                             @endif

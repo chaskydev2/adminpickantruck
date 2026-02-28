@@ -13,6 +13,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\TipoCamionController;
+use App\Http\Controllers\MembershipController;
 
 
 Route::get('/refresh', function(){
@@ -147,10 +148,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{document}/editar', [UserDocumentController::class, 'edit'])->name('user-documents.edit');
         Route::put('/{document}', [UserDocumentController::class, 'update'])->name('user-documents.update');
         Route::get('/{document}/preview', [UserDocumentController::class, 'preview'])->name('user-documents.preview');
+        Route::get('/{document}/download', [UserDocumentController::class, 'download'])->name('user-documents.download');
         Route::get('/{document}', [UserDocumentController::class, 'show'])->name('user-documents.show');
         Route::delete('/{document}', [UserDocumentController::class, 'destroy'])->name('user-documents.destroy');
     });
 
     Route::resource('tiposcamion', TipoCamionController::class);
+
+    // Membresías
+    Route::prefix('membresias')->name('memberships.')->group(function () {
+        Route::get('/', [MembershipController::class, 'index'])->name('index');
+        Route::get('/{membership}', [MembershipController::class, 'show'])->name('show');
+        Route::patch('/{membership}/activate', [MembershipController::class, 'activate'])->name('activate');
+        Route::patch('/{membership}/cancel', [MembershipController::class, 'cancel'])->name('cancel');
+    });
 
 });

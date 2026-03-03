@@ -61,7 +61,7 @@
             <p>Nos complace informarte que tus documentos han sido revisados y aprobados exitosamente. Tu cuenta en <strong>Pick&Truck</strong> ha sido verificada y se encuentra activa.</p>
             <p>A partir de este momento, puedes acceder a todas las funcionalidades de nuestra plataforma.</p>
             <p style="text-align: center;">
-                <a href="{{ config('app.url') }}" class="cta-button">Ir a la Plataforma</a>
+                <a href="https://app.pickntruck.com" class="cta-button">Ir a la Plataforma</a>
             </p>
             <p>Si tienes alguna pregunta o necesitas asistencia, no dudes en contactar a nuestro equipo de soporte.</p>
             <p>¡Gracias por confiar en nosotros!</p>
